@@ -1,0 +1,668 @@
+/* JTEC Electrical Services: design tokens and base styles. See DESIGN.md for the reasons. */
+
+@import '@fontsource-variable/archivo/standard.css';
+
+:root {
+  /* brand colours (sampled from the company profile) */
+  --c-dawn: #032b4f;
+  --c-stone: #f1f0eb;
+  --c-stone-2: #e4e2da;
+  --c-blue: #0461bd;
+  --c-amber: #ffb303;
+  --c-amber-bright: #ffc433;
+  --c-amber-deep: #e9a200;
+  --c-navy: #004b7e;
+  --c-night: #01182c;
+  --c-ink: #06223d;
+  --c-paper: #f4f3ee;
+
+  /* type */
+  --font: 'Archivo Variable', 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --step-small: clamp(0.8125rem, 0.79rem + 0.1vw, 0.875rem);
+  --step-body: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem);
+  --step-lead: clamp(1.25rem, 1.1rem + 0.7vw, 1.625rem);
+  --step-head: clamp(2.25rem, 1.2rem + 3.6vw, 4.5rem);
+  --step-display: clamp(2.6rem, 0.9rem + 6.6vw, 8.25rem);
+
+  /* space */
+  --margin: clamp(16px, 4vw, 56px);
+  --gutter: clamp(16px, 2vw, 32px);
+  --max: 1360px;
+  --section-y: clamp(88px, 11vw, 200px);
+  --header-h: 72px;
+
+  /* motion */
+  --ease: cubic-bezier(0.2, 0.7, 0.1, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --t-feedback: 160ms;
+  --t-colour: 300ms;
+  --t-reveal: 800ms;
+
+  /* default chapter (stone) so content outside a chapter still has roles */
+  --bg: var(--c-stone);
+  --ink: var(--c-ink);
+  --muted: #405468;
+  --surface: var(--c-stone-2);
+  --accent: var(--c-amber);
+  --accent-ink: var(--c-ink);
+  --focus: var(--c-ink);
+  --cable: var(--c-ink);
+}
+
+/* ------------------------------------------------------------------ chapters */
+[data-chapter] {
+  background-color: var(--bg);
+  color: var(--ink);
+}
+
+[data-chapter='dawn'] {
+  --bg: var(--c-dawn);
+  --ink: var(--c-paper);
+  --muted: rgb(244 243 238 / 0.76);
+  --surface: #0a3a66;
+  --accent: var(--c-amber);
+  --accent-ink: var(--c-ink);
+  --focus: var(--c-amber);
+  --cable: var(--c-amber);
+  color-scheme: dark;
+}
+
+[data-chapter='stone'] {
+  --bg: var(--c-stone);
+  --ink: var(--c-ink);
+  --muted: #405468;
+  --surface: var(--c-stone-2);
+  --accent: var(--c-amber);
+  --accent-ink: var(--c-ink);
+  --focus: var(--c-blue);
+  --cable: var(--c-blue);
+  color-scheme: light;
+}
+
+[data-chapter='blue'] {
+  --bg: var(--c-blue);
+  --ink: #ffffff;
+  --muted: rgb(255 255 255 / 0.86);
+  --surface: #0a56a6;
+  --accent: var(--c-amber);
+  --accent-ink: var(--c-ink);
+  --focus: var(--c-amber);
+  --cable: var(--c-amber);
+  color-scheme: dark;
+}
+
+[data-chapter='amber'] {
+  --bg: var(--c-amber);
+  --ink: var(--c-ink);
+  --muted: rgb(6 34 61 / 0.82);
+  --surface: #f2a900;
+  --accent: var(--c-ink);
+  --accent-ink: var(--c-amber);
+  --focus: var(--c-ink);
+  --cable: var(--c-ink);
+  color-scheme: light;
+}
+
+[data-chapter='navy'] {
+  --bg: var(--c-navy);
+  --ink: var(--c-paper);
+  --muted: rgb(244 243 238 / 0.8);
+  --surface: #0a5a92;
+  --accent: var(--c-amber);
+  --accent-ink: var(--c-ink);
+  --focus: var(--c-amber);
+  --cable: var(--c-amber);
+  color-scheme: dark;
+}
+
+[data-chapter='night'] {
+  --bg: var(--c-night);
+  --ink: var(--c-paper);
+  --muted: rgb(244 243 238 / 0.74);
+  --surface: #0a2a46;
+  --accent: var(--c-amber);
+  --accent-ink: var(--c-ink);
+  --focus: var(--c-amber);
+  --cable: var(--c-amber);
+  color-scheme: dark;
+}
+
+/* ------------------------------------------------------------------ reset */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-top: calc(var(--header-h) + 16px);
+  background: var(--c-dawn);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:focus-within {
+    scroll-behavior: smooth;
+  }
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+  font-family: var(--font);
+  font-size: var(--step-body);
+  font-weight: 400;
+  font-stretch: 100%;
+  line-height: 1.55;
+  color: var(--ink);
+  background: var(--bg);
+  font-kerning: normal;
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overflow-x: clip;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+img,
+svg,
+video,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+img {
+  height: auto;
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+figure,
+blockquote,
+dl,
+dd,
+ol,
+ul {
+  margin: 0;
+}
+
+ol,
+ul {
+  padding: 0;
+  list-style: none;
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+}
+
+a[href],
+button:not(:disabled),
+summary,
+select,
+label[for],
+input[type='checkbox'],
+input[type='radio'],
+input[type='range'],
+[role='button'],
+[role='tab'],
+[role='switch'] {
+  cursor: pointer;
+}
+
+button:disabled,
+[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
+::selection {
+  background: var(--c-amber);
+  color: var(--c-ink);
+}
+
+/* Focus: a soft two-step halo (gap in the chapter colour, then the focus ring) that is never removed.
+   The transparent outline keeps a visible indicator in forced-colours mode. */
+:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 3px;
+  box-shadow:
+    0 0 0 2px var(--bg),
+    0 0 0 5px var(--focus),
+    0 0 0 11px color-mix(in srgb, var(--focus) 20%, transparent);
+  border-radius: 2px;
+}
+
+@media (forced-colors: active) {
+  :focus-visible {
+    outline: 3px solid CanvasText;
+  }
+}
+
+/* ------------------------------------------------------------------ layout */
+.wrap {
+  width: min(100% - 2 * var(--margin), var(--max));
+  margin-inline: auto;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+}
+
+.chapter {
+  position: relative;
+  padding-block: var(--section-y);
+  isolation: isolate;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 100;
+  padding: 12px 18px;
+  background: var(--c-amber);
+  color: var(--c-ink);
+  font-weight: 600;
+  text-decoration: none;
+  transform: translateY(-160%);
+  transition: transform var(--t-colour) var(--ease);
+}
+
+.skip-link:focus-visible {
+  transform: none;
+}
+
+/* ------------------------------------------------------------------ type */
+.t-display {
+  font-size: var(--step-display);
+  font-weight: 800;
+  font-stretch: 112%;
+  line-height: 0.92;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+.t-head {
+  font-size: var(--step-head);
+  font-weight: 760;
+  font-stretch: 106%;
+  line-height: 1;
+  letter-spacing: -0.028em;
+  text-wrap: balance;
+}
+
+.t-lead {
+  font-size: var(--step-lead);
+  font-weight: 420;
+  line-height: 1.38;
+  letter-spacing: -0.01em;
+  text-wrap: pretty;
+}
+
+.t-body {
+  font-size: var(--step-body);
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+.t-small {
+  font-size: var(--step-small);
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.t-num {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.measure {
+  max-width: 62ch;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+p a,
+.text-link {
+  text-decoration-line: underline;
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.18em;
+  text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+  transition: text-decoration-color var(--t-colour) var(--ease);
+}
+
+p a:hover,
+.text-link:hover {
+  text-decoration-color: currentColor;
+}
+
+@media (max-width: 640px) {
+  .t-display {
+    font-stretch: 100%;
+    letter-spacing: -0.03em;
+  }
+
+  .t-head {
+    font-stretch: 100%;
+  }
+}
+
+/* ------------------------------------------------------------------ buttons */
+.btn {
+  --btn-bg: var(--accent);
+  --btn-ink: var(--accent-ink);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65em;
+  min-height: 56px;
+  padding: 0 1.6em;
+  border: 0;
+  border-radius: 0;
+  background-color: var(--btn-bg);
+  color: var(--btn-ink);
+  font-size: var(--step-body);
+  font-weight: 640;
+  font-stretch: 104%;
+  letter-spacing: -0.005em;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  isolation: isolate;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color var(--t-colour) var(--ease),
+    color var(--t-colour) var(--ease),
+    box-shadow var(--t-colour) var(--ease),
+    transform var(--t-feedback) var(--ease);
+}
+
+/* lighting, not movement: a soft highlight follows the pointer across the surface */
+.btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(
+    140px circle at var(--mx, 50%) var(--my, 50%),
+    rgb(255 255 255 / 0.42),
+    transparent 72%
+  );
+  opacity: 0;
+  transition: opacity 420ms var(--ease);
+}
+
+.btn:hover {
+  background-color: color-mix(in oklab, var(--btn-bg) 90%, white);
+}
+
+.btn:hover::before {
+  opacity: 1;
+}
+
+.btn:active {
+  transform: scale(0.985);
+  background-color: color-mix(in oklab, var(--btn-bg) 86%, black);
+  transition-duration: 80ms;
+}
+
+.btn:focus-visible {
+  border-radius: 0;
+}
+
+.btn:disabled,
+.btn[aria-disabled='true'] {
+  background-color: color-mix(in oklab, var(--btn-bg) 45%, var(--bg));
+  color: color-mix(in oklab, var(--btn-ink) 60%, var(--bg));
+  transform: none;
+}
+
+.btn:disabled::before,
+.btn[aria-disabled='true']::before {
+  display: none;
+}
+
+.btn[aria-busy='true'] {
+  cursor: progress;
+}
+
+.btn[aria-busy='true']::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  width: 100%;
+  background: currentColor;
+  transform-origin: left;
+  animation: btn-charge 1.1s var(--ease-in-out) infinite;
+}
+
+@keyframes btn-charge {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.btn--small {
+  min-height: 44px;
+  padding: 0 1.15em;
+  font-size: var(--step-small);
+  font-weight: 650;
+}
+
+.btn--block {
+  width: 100%;
+}
+
+.btn svg {
+  width: 1.1em;
+  height: 1.1em;
+  flex: none;
+}
+
+/* chips: toggles for filters and map views */
+.chip {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 0;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: var(--step-small);
+  font-weight: 600;
+  font-stretch: 104%;
+  transition:
+    background-color var(--t-colour) var(--ease),
+    color var(--t-colour) var(--ease);
+}
+
+.chip:hover {
+  background: color-mix(in oklab, var(--surface) 80%, var(--ink));
+}
+
+.chip:active {
+  background: color-mix(in oklab, var(--surface) 70%, var(--ink));
+}
+
+.chip[aria-pressed='true'] {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+/* the cable link: the identity motif as a secondary action */
+.cable-link {
+  --cable-w: 2.2em;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75em;
+  min-height: 48px;
+  padding-block: 4px;
+  color: inherit;
+  font-weight: 600;
+  font-stretch: 104%;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cable-link__wire {
+  position: relative;
+  display: inline-block;
+  width: var(--cable-w);
+  height: 14px;
+  flex: none;
+  transition: width 520ms var(--ease);
+}
+
+.cable-link__wire::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 12px;
+  top: 50%;
+  height: 2.5px;
+  margin-top: -1.25px;
+  border-radius: 2px;
+  background: var(--cable);
+}
+
+.cable-link__wire::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  margin-top: -7px;
+  border-radius: 50%;
+  border: 2.5px solid var(--cable);
+  background: transparent;
+  transition: background-color var(--t-colour) var(--ease);
+}
+
+.cable-link:hover .cable-link__wire,
+.cable-link:focus-visible .cable-link__wire {
+  width: calc(var(--cable-w) + 1.4em);
+}
+
+.cable-link:hover .cable-link__wire::after,
+.cable-link:focus-visible .cable-link__wire::after {
+  background: var(--cable);
+}
+
+.cable-link:active .cable-link__wire::after {
+  transform: scale(0.85);
+}
+
+/* ------------------------------------------------------------------ media */
+.photo {
+  position: relative;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.caption {
+  margin-top: 12px;
+  font-size: var(--step-small);
+  font-weight: 500;
+  color: var(--muted);
+}
+
+/* ------------------------------------------------------------------ reveal (only when motion runs) */
+.motion [data-reveal]:not(.is-in) {
+  opacity: 0;
+  transform: translate3d(0, 24px, 0);
+}
+
+.motion [data-reveal='fade']:not(.is-in) {
+  transform: none;
+}
+
+/* ------------------------------------------------------------------ cross-document view transitions */
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root) {
+    animation: vt-out 260ms var(--ease-in-out) both;
+  }
+
+  ::view-transition-new(root) {
+    animation: vt-shutter 640ms var(--ease) both;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+@keyframes vt-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes vt-shutter {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

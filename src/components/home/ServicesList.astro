@@ -1,0 +1,254 @@
+---
+import { Image } from 'astro:assets';
+import { services } from '../../data/services';
+---
+
+<section class="svc chapter" data-chapter="blue" aria-labelledby="svc-title">
+  <div class="wrap">
+    <header class="svc__head">
+      <h2 id="svc-title" class="t-head" data-reveal>From the meter to the roof.</h2>
+      <p class="t-lead svc__lede" data-reveal>
+        Solar and electrical work under one roof: the same team designs, supplies, installs and maintains the system.
+      </p>
+    </header>
+
+    <div class="svc__body">
+      <ol class="svc__list">
+        {
+          services.map((s, i) => (
+            <li class="svc__item" data-reveal>
+              <a class="svc__link" href={`/services/#${s.slug}`} data-index={i} data-active={i === 0 ? 'true' : 'false'}>
+                <span class="svc__marker" aria-hidden="true" />
+                <span class="svc__name">{s.name}</span>
+                <span class="svc__summary">{s.summary}</span>
+                <span class="svc__thumb" aria-hidden="true">
+                  <Image src={s.image} alt="" widths={[200, 320]} sizes="120px" loading="lazy" />
+                </span>
+              </a>
+            </li>
+          ))
+        }
+      </ol>
+
+      <div class="svc__preview" aria-hidden="true">
+        {
+          services.map((s, i) => (
+            <figure class="svc__shot" data-index={i} data-active={i === 0 ? 'true' : 'false'}>
+              <Image src={s.image} alt="" widths={[360, 480]} sizes="(max-width: 1200px) 34vw, 440px" loading="lazy" />
+              <figcaption>{s.alt}</figcaption>
+            </figure>
+          ))
+        }
+      </div>
+    </div>
+
+    <a class="cable-link svc__all" href="/services/" data-reveal
+      ><span class="cable-link__wire" aria-hidden="true"></span>All services and how a project runs</a
+    >
+  </div>
+</section>
+
+<style>
+  .svc__head {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    row-gap: 24px;
+  }
+
+  .svc__head h2 {
+    grid-column: 1 / span 10;
+  }
+
+  .svc__lede {
+    grid-column: 1 / span 6;
+    color: var(--muted);
+  }
+
+  .svc__body {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    margin-top: clamp(48px, 6vw, 88px);
+  }
+
+  .svc__list {
+    grid-column: 1 / span 7;
+    display: grid;
+    gap: 6px;
+  }
+
+  .svc__link {
+    position: relative;
+    display: grid;
+    grid-template-columns: 2.6rem 1fr;
+    column-gap: 14px;
+    padding: 18px 0 20px;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .svc__marker {
+    grid-row: 1 / span 2;
+    position: relative;
+    height: 0.9em;
+    margin-top: 0.62em;
+    font-size: clamp(1.75rem, 1.1rem + 1.9vw, 2.75rem);
+  }
+
+  /* the cable motif marks the active service */
+  .svc__marker::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0.42em;
+    top: 50%;
+    height: 3px;
+    margin-top: -1.5px;
+    background: var(--cable);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 520ms var(--ease);
+  }
+
+  .svc__marker::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    width: 0.42em;
+    height: 0.42em;
+    margin-top: -0.21em;
+    border: 3px solid var(--cable);
+    border-radius: 50%;
+    opacity: 0;
+    transition:
+      opacity var(--t-colour) var(--ease),
+      background-color var(--t-colour) var(--ease);
+  }
+
+  .svc__link[data-active='true'] .svc__marker::before {
+    transform: scaleX(1);
+  }
+
+  .svc__link[data-active='true'] .svc__marker::after {
+    opacity: 1;
+    background: var(--cable);
+  }
+
+  .svc__name {
+    font-size: clamp(1.75rem, 1.1rem + 1.9vw, 2.75rem);
+    font-weight: 740;
+    font-stretch: 106%;
+    letter-spacing: -0.03em;
+    line-height: 1.08;
+    transition: color var(--t-colour) var(--ease);
+  }
+
+  .svc__summary {
+    grid-column: 2;
+    margin-top: 8px;
+    color: var(--muted);
+    max-width: 46ch;
+  }
+
+  .svc__link:hover .svc__name,
+  .svc__link[data-active='true'] .svc__name {
+    color: var(--c-amber);
+  }
+
+  .svc__thumb {
+    display: none;
+  }
+
+  .svc__preview {
+    grid-column: 9 / span 4;
+    position: relative;
+    align-self: start;
+    position: sticky;
+    top: calc(var(--header-h) + 32px);
+    aspect-ratio: 4 / 3;
+    max-width: 460px;
+    width: 100%;
+    justify-self: end;
+  }
+
+  .svc__shot {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    opacity: 0;
+    transition: opacity 520ms var(--ease);
+  }
+
+  .svc__shot[data-active='true'] {
+    opacity: 1;
+  }
+
+  .svc__shot :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .svc__shot figcaption {
+    margin-top: 14px;
+    font-size: var(--step-small);
+    color: var(--muted);
+  }
+
+  .svc__all {
+    margin-top: clamp(40px, 5vw, 64px);
+  }
+
+  @media (max-width: 900px) {
+    .svc__head h2,
+    .svc__lede,
+    .svc__list {
+      grid-column: 1 / -1;
+    }
+    .svc__preview {
+      display: none;
+    }
+    .svc__link {
+      grid-template-columns: 1fr 96px;
+      column-gap: 16px;
+    }
+    .svc__marker {
+      display: none;
+    }
+    .svc__summary {
+      grid-column: 1;
+    }
+    .svc__thumb {
+      display: block;
+      grid-column: 2;
+      grid-row: 1 / span 2;
+      align-self: start;
+      aspect-ratio: 1;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+    .svc__thumb :global(img) {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+</style>
+
+<script>
+  // Pointer or keyboard focus on a service shows its photograph in the preview.
+  document.querySelectorAll<HTMLElement>('.svc').forEach((section) => {
+    const links = Array.from(section.querySelectorAll<HTMLAnchorElement>('.svc__link'));
+    const shots = Array.from(section.querySelectorAll<HTMLElement>('.svc__shot'));
+    const activate = (index: number) => {
+      links.forEach((l, i) => (l.dataset.active = String(i === index)));
+      shots.forEach((s, i) => (s.dataset.active = String(i === index)));
+    };
+    links.forEach((link, i) => {
+      link.addEventListener('pointerenter', () => activate(i));
+      link.addEventListener('focus', () => activate(i));
+    });
+  });
+</script>

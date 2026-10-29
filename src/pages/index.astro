@@ -1,0 +1,27 @@
+---
+import Base from '../layouts/Base.astro';
+import Hero from '../components/home/Hero.astro';
+import Intro from '../components/home/Intro.astro';
+import PhotoBand from '../components/home/PhotoBand.astro';
+import ServicesList from '../components/home/ServicesList.astro';
+import InstallLog from '../components/InstallLog.astro';
+import MapSection from '../components/MapSection.astro';
+import TeamGrid from '../components/TeamGrid.astro';
+---
+
+<Base
+  title="JTEC Electrical Services | Solar installation and electrical works, Luzon"
+  description="JTEC Electrical Services and its division, JTEC Solar Installation, design, supply and install hybrid and grid-tied solar systems and electrical works for homes and businesses across Luzon. Based in Pura, Tarlac."
+  firstChapter="dawn"
+>
+  <Hero />
+  <Intro />
+  <PhotoBand />
+  <ServicesList />
+  <InstallLog />
+  <MapSection
+    title="On Luzon job sites since 2016."
+    intro="Solar installations from JTEC’s log and the major electrical projects in its work experience, from BPO2 Circuit Makati in 2016 to the North to South Railway Project in Mabalacat."
+  />
+  <TeamGrid />
+</Base>

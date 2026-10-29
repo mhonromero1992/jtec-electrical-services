@@ -1,0 +1,19 @@
+---
+// Traced from the JTEC logo in the company profile. Colours come from --logo-navy, --logo-ink and
+// --logo-amber so the logo can follow the chapter it sits on.
+interface Props {
+  part: 'mark' | 'wordmark';
+  class?: string;
+}
+
+const { part, class: className } = Astro.props;
+const boxes = {
+  mark: { w: 1154, h: 1171 },
+  wordmark: { w: 1572, h: 282 },
+} as const;
+const { w, h } = boxes[part];
+---
+
+<svg class={className} viewBox={`0 0 ${w} ${h}`} aria-hidden="true" focusable="false">
+  <use href={`/brand/jtec-logo-sprite.svg#jtec-${part}`} width={w} height={h}></use>
+</svg>

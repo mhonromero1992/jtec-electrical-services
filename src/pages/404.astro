@@ -1,0 +1,110 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  title="Page not found | JTEC Electrical Services"
+  description="The page you were looking for is not on the JTEC Electrical Services website."
+  firstChapter="night"
+  footerCta={false}
+>
+  <section class="nf" data-chapter="night" aria-labelledby="page-title">
+    <div class="wrap nf__grid">
+      <div class="nf__break" aria-hidden="true">
+        <span class="nf__end nf__end--left"></span>
+        <span class="nf__end nf__end--right"></span>
+      </div>
+      <h1 id="page-title" class="t-display nf__title">This circuit is open.</h1>
+      <p class="t-lead nf__text">
+        The page you were looking for isn’t here. It may have moved, or the link may be mistyped.
+      </p>
+      <ul class="nf__links">
+        <li><a class="btn" href="/">Back to the home page</a></li>
+        <li><a class="cable-link" href="/projects/"><span class="cable-link__wire" aria-hidden="true"></span>See the installations</a></li>
+        <li><a class="cable-link" href="/contact/"><span class="cable-link__wire" aria-hidden="true"></span>Request a quotation</a></li>
+      </ul>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .nf {
+    min-height: 88svh;
+    padding-top: calc(var(--header-h) + clamp(48px, 10vh, 140px));
+    padding-bottom: var(--section-y);
+  }
+
+  .nf__grid {
+    display: grid;
+    gap: 28px;
+  }
+
+  /* two cable ends that do not meet */
+  .nf__break {
+    display: flex;
+    gap: clamp(28px, 6vw, 96px);
+    margin-bottom: clamp(16px, 3vw, 40px);
+  }
+
+  .nf__end {
+    position: relative;
+    display: block;
+    width: clamp(120px, 22vw, 320px);
+    height: 28px;
+  }
+
+  .nf__end::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    height: 4px;
+    margin-top: -2px;
+    background: var(--c-amber);
+    border-radius: 2px;
+  }
+
+  .nf__end::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    width: 28px;
+    height: 28px;
+    border: 4px solid var(--c-amber);
+    border-radius: 50%;
+  }
+
+  .nf__end--left::before {
+    left: 0;
+    right: 26px;
+  }
+
+  .nf__end--left::after {
+    right: 0;
+  }
+
+  .nf__end--right::before {
+    left: 26px;
+    right: 0;
+  }
+
+  .nf__end--right::after {
+    left: 0;
+  }
+
+  .nf__title {
+    font-size: min(var(--step-display), 9vw);
+  }
+
+  .nf__text {
+    max-width: 38ch;
+    color: var(--muted);
+  }
+
+  .nf__links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px 32px;
+    margin-top: 12px;
+  }
+</style>

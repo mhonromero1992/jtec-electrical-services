@@ -1,0 +1,181 @@
+---
+import { process, type ChapterName } from '../data/site';
+
+interface Props {
+  id?: string;
+  title?: string;
+  intro?: string;
+  chapter?: ChapterName;
+}
+
+const {
+  id = 'process',
+  title = 'How a JTEC project runs',
+  intro = 'Seven stages, in this order, from the first conversation to support after handover.',
+  chapter = 'navy',
+} = Astro.props;
+---
+
+<section class="proc chapter" data-chapter={chapter} aria-labelledby={`${id}-title`}>
+  <div class="wrap">
+    <div class="proc__head">
+      <h2 id={`${id}-title`} class="t-head" data-reveal>{title}</h2>
+      <p class="t-lead proc__intro" data-reveal>{intro}</p>
+    </div>
+
+    <div class="proc__track">
+      <span class="proc__cable" aria-hidden="true"><span class="proc__current"></span></span>
+      <ol class="proc__steps">
+        {
+          process.map((step) => (
+            <li class="proc__step" data-reveal>
+              <span class="proc__terminal" aria-hidden="true" />
+              <h3 class="proc__name">{step.title}</h3>
+              <p class="proc__text">{step.text}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </div>
+</section>
+
+<style>
+  .proc__head {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    row-gap: 24px;
+  }
+
+  .proc__head h2 {
+    grid-column: 1 / span 8;
+  }
+
+  .proc__intro {
+    grid-column: 1 / span 6;
+    color: var(--muted);
+  }
+
+  /* desktop: the steps hang along one horizontal cable */
+  .proc__track {
+    position: relative;
+    margin-top: clamp(56px, 7vw, 104px);
+    padding-top: 52px;
+  }
+
+  .proc__steps {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: var(--gutter);
+  }
+
+  .proc__cable {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 14px;
+    height: 3px;
+    background: color-mix(in srgb, var(--ink) 22%, transparent);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .proc__current {
+    position: absolute;
+    inset: 0;
+    background: var(--cable);
+    transform-origin: left;
+    transform: scaleX(var(--progress, 1));
+  }
+
+  .proc__step {
+    position: relative;
+  }
+
+  .proc__terminal {
+    position: absolute;
+    left: 0;
+    top: -52px;
+    width: 30px;
+    height: 30px;
+    border: 3px solid var(--cable);
+    border-radius: 50%;
+    background: var(--bg);
+  }
+
+  .proc__name {
+    font-size: var(--step-body);
+    font-weight: 720;
+    font-stretch: 104%;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+  }
+
+  .proc__text {
+    margin-top: 8px;
+    font-size: var(--step-small);
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  @media (max-width: 1100px) {
+    .proc__head h2,
+    .proc__intro {
+      grid-column: 1 / -1;
+    }
+
+    /* phones and tablets: the cable runs down the left side */
+    .proc__track {
+      padding-top: 0;
+      padding-left: 52px;
+    }
+    .proc__steps {
+      grid-template-columns: 1fr;
+      gap: 28px;
+    }
+    .proc__cable {
+      left: 14px;
+      right: auto;
+      top: 6px;
+      bottom: 6px;
+      width: 3px;
+      height: auto;
+    }
+    .proc__current {
+      transform-origin: top;
+      transform: scaleY(var(--progress, 1));
+    }
+    .proc__terminal {
+      left: -52px;
+      top: -4px;
+    }
+    .proc__text {
+      font-size: var(--step-body);
+      max-width: 52ch;
+    }
+  }
+</style>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  // Current flows along the cable as the steps scroll past.
+  if (document.documentElement.classList.contains('motion')) {
+    gsap.registerPlugin(ScrollTrigger);
+    document.querySelectorAll<HTMLElement>('.proc__track').forEach((steps) => {
+      const current = steps.querySelector<HTMLElement>('.proc__current');
+      if (!current) return;
+      gsap.fromTo(
+        current,
+        { '--progress': 0 },
+        {
+          '--progress': 1,
+          ease: 'none',
+          scrollTrigger: { trigger: steps, start: 'top 78%', end: 'bottom 45%', scrub: 0.5 },
+        },
+      );
+    });
+  }
+</script>

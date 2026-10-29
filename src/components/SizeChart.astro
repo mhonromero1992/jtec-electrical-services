@@ -1,0 +1,321 @@
+---
+import { projects, formatDate, formatKwp } from '../data/projects';
+
+interface Props {
+  id?: string;
+}
+
+const { id = 'sizes' } = Astro.props;
+const rows = [...projects].sort((a, b) => b.kwp - a.kwp);
+const max = 16; // axis ceiling, the largest system in the log
+const ticks = [0, 4, 8, 12, 16];
+const extremes = new Set([rows[0].slug, rows[rows.length - 1].slug]);
+const town = (loc?: string) => (loc ? loc.split(',')[0] : 'Not listed');
+const describe = (p: (typeof rows)[number]) =>
+  [
+    `${formatKwp(p.kwp)} ${p.type === 'Hybrid' ? 'hybrid' : 'grid-tied'}`,
+    p.batteryAh ? `${p.batteryAh} Ah battery` : 'no battery',
+    p.location ?? 'location not listed',
+    formatDate(p.date) ?? 'not dated',
+  ].join(', ');
+---
+
+<figure class="sizes" aria-labelledby={`${id}-cap`}>
+  <figcaption id={`${id}-cap`} class="sizes__cap">
+    <span class="sizes__title">Every system in the log, to scale</span>
+    <span class="sizes__sub">Array size in kWp, largest to smallest. Select a bar to see its photographs.</span>
+  </figcaption>
+
+  <div class="sizes__plot">
+    <div class="sizes__grid" aria-hidden="true">
+      {
+        ticks.map((t) => (
+          <div class="sizes__tick" style={`--at:${t / max}`}>
+            <span>{t === 0 ? '0' : `${t}`}</span>
+          </div>
+        ))
+      }
+    </div>
+    <ol class="sizes__bars" style={`--n:${rows.length}`}>
+      {
+        rows.map((p) => (
+          <li class="sizes__col" style={`--v:${p.kwp / max}`}>
+            <a class="sizes__hit" href={`#${p.slug}`} aria-label={describe(p)} data-tip={describe(p)}>
+              <span class="sizes__bar" aria-hidden="true" />
+              <span class={`sizes__value t-num${extremes.has(p.slug) ? ' is-extreme' : ''}`} aria-hidden="true">
+                {formatKwp(p.kwp)}
+              </span>
+            </a>
+            <span class="sizes__label" aria-hidden="true">
+              {town(p.location)}
+            </span>
+          </li>
+        ))
+      }
+    </ol>
+    <div class="sizes__tooltip" role="status" aria-live="off" hidden>
+      <strong class="t-num"></strong>
+      <span></span>
+    </div>
+  </div>
+</figure>
+
+<style>
+  .sizes {
+    margin: 0;
+  }
+
+  .sizes__cap {
+    display: grid;
+    gap: 4px;
+  }
+
+  .sizes__title {
+    font-size: var(--step-lead);
+    font-weight: 720;
+    font-stretch: 104%;
+    letter-spacing: -0.015em;
+  }
+
+  .sizes__sub {
+    font-size: var(--step-small);
+    color: var(--muted);
+  }
+
+  .sizes__plot {
+    --h: clamp(200px, 24vw, 320px);
+    position: relative;
+    margin-top: 28px;
+    padding-left: 34px;
+  }
+
+  .sizes__grid {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: var(--h);
+    pointer-events: none;
+  }
+
+  .sizes__tick {
+    position: absolute;
+    left: 34px;
+    right: 0;
+    bottom: calc(var(--at) * 100%);
+    height: 1px;
+    background: rgb(6 34 61 / 0.16);
+  }
+
+  .sizes__tick span {
+    position: absolute;
+    left: -34px;
+    top: -0.7em;
+    font-size: 0.75rem;
+    font-weight: 560;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .sizes__bars {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+    gap: 2px;
+  }
+
+  .sizes__col {
+    display: grid;
+    grid-template-rows: var(--h) auto;
+    justify-items: center;
+  }
+
+  .sizes__hit {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .sizes__bar {
+    width: min(24px, 60%);
+    height: calc(var(--v) * 100%);
+    border-radius: 4px 4px 0 0;
+    background: var(--c-blue);
+    transition:
+      background-color var(--t-colour) var(--ease),
+      transform 520ms var(--ease);
+    transform-origin: bottom;
+  }
+
+  .sizes__hit:hover .sizes__bar,
+  .sizes__hit:focus-visible .sizes__bar {
+    background: color-mix(in oklab, var(--c-blue) 80%, white);
+  }
+
+  .sizes__hit:focus-visible {
+    box-shadow: none;
+    outline: 3px solid var(--ink);
+    outline-offset: 2px;
+  }
+
+  /* desktop labels only the extremes; the tooltip and the catalogue carry the rest */
+  .sizes__value:not(.is-extreme) {
+    display: none;
+  }
+
+  .sizes__value {
+    position: absolute;
+    bottom: calc(var(--v) * 100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: var(--step-small);
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .sizes__label {
+    margin-top: 10px;
+    font-size: 0.75rem;
+    font-weight: 560;
+    line-height: 1.2;
+    text-align: center;
+    color: var(--muted);
+    overflow-wrap: anywhere;
+  }
+
+  .sizes__tooltip {
+    position: absolute;
+    z-index: 2;
+    display: grid;
+    gap: 2px;
+    max-width: 260px;
+    padding: 10px 12px;
+    background: var(--c-ink);
+    color: var(--c-paper);
+    font-size: var(--step-small);
+    line-height: 1.4;
+    pointer-events: none;
+    box-shadow: 0 16px 32px -16px rgb(0 0 0 / 0.5);
+  }
+
+  .sizes__tooltip strong {
+    font-size: var(--step-body);
+  }
+
+  :global(.motion) .sizes:not(.is-drawn) .sizes__bar {
+    transform: scaleY(0);
+  }
+
+  /* phones: horizontal bars, label on the left and value at the tip */
+  @media (max-width: 760px) {
+    .sizes__plot {
+      padding-left: 0;
+    }
+    .sizes__grid {
+      display: none;
+    }
+    .sizes__bars {
+      grid-template-columns: 1fr;
+      gap: 6px;
+    }
+    .sizes__col {
+      grid-template-columns: 8.5rem 1fr;
+      grid-template-rows: auto;
+      align-items: center;
+      justify-items: stretch;
+    }
+    .sizes__label {
+      grid-row: 1;
+      grid-column: 1;
+      margin: 0;
+      text-align: left;
+      font-size: var(--step-small);
+    }
+    .sizes__hit {
+      grid-column: 2;
+      height: 40px;
+      justify-content: flex-start;
+      align-items: center;
+    }
+    .sizes__bar {
+      width: calc(var(--v) * (100% - 4.75rem));
+      height: 16px;
+      border-radius: 0 4px 4px 0;
+      transform-origin: left;
+    }
+    :global(.motion) .sizes:not(.is-drawn) .sizes__bar {
+      transform: scaleX(0);
+    }
+    .sizes__value,
+    .sizes__value:not(.is-extreme) {
+      display: inline;
+      position: static;
+      transform: none;
+      margin-left: 8px;
+    }
+  }
+</style>
+
+<script>
+  import { gsap } from 'gsap';
+
+  document.querySelectorAll<HTMLElement>('.sizes').forEach((chart) => {
+    const plot = chart.querySelector<HTMLElement>('.sizes__plot')!;
+    const tip = chart.querySelector<HTMLElement>('.sizes__tooltip')!;
+    const [value, detail] = [tip.querySelector('strong')!, tip.querySelector('span')!];
+
+    // the bars grow from the baseline once, when the chart arrives
+    if (document.documentElement.classList.contains('motion')) {
+      const io = new IntersectionObserver(
+        (entries) => {
+          if (!entries.some((e) => e.isIntersecting)) return;
+          io.disconnect();
+          const horizontal = window.matchMedia('(max-width: 760px)').matches;
+          const bars = chart.querySelectorAll('.sizes__bar');
+          gsap.fromTo(
+            bars,
+            horizontal ? { scaleX: 0 } : { scaleY: 0 },
+            {
+              ...(horizontal ? { scaleX: 1 } : { scaleY: 1 }),
+              duration: 0.9,
+              ease: 'power3.out',
+              stagger: 0.04,
+              onComplete: () => {
+                chart.classList.add('is-drawn');
+                gsap.set(bars, { clearProps: 'transform' });
+              },
+            },
+          );
+        },
+        { threshold: 0.25 },
+      );
+      io.observe(chart);
+    }
+
+    // one tooltip, positioned over the hovered or focused bar; text set with textContent
+    const show = (hit: HTMLElement) => {
+      const parts = (hit.dataset.tip ?? '').split(', ');
+      value.textContent = parts.shift() ?? '';
+      detail.textContent = parts.join(', ');
+      tip.hidden = false;
+      const p = plot.getBoundingClientRect();
+      const b = hit.querySelector<HTMLElement>('.sizes__bar')!.getBoundingClientRect();
+      const x = Math.min(Math.max(b.left + b.width / 2 - p.left - tip.offsetWidth / 2, 0), p.width - tip.offsetWidth);
+      const y = Math.max(b.top - p.top - tip.offsetHeight - 10, -tip.offsetHeight - 4);
+      tip.style.left = `${x}px`;
+      tip.style.top = `${y}px`;
+    };
+    const hide = () => (tip.hidden = true);
+    chart.querySelectorAll<HTMLElement>('.sizes__hit').forEach((hit) => {
+      hit.addEventListener('pointerenter', () => show(hit));
+      hit.addEventListener('pointerleave', hide);
+      hit.addEventListener('focus', () => show(hit));
+      hit.addEventListener('blur', hide);
+    });
+  });
+</script>

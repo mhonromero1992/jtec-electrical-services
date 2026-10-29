@@ -1,0 +1,807 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import { site } from '../../data/site';
+
+// Rendered still of the diorama (see README: "Regenerating the hero poster"). Used before the 3D scene
+// is ready and as the fallback when WebGL or JavaScript is unavailable.
+const posters = import.meta.glob<{ default: ImageMetadata }>('../../assets/hero/hero-poster.jpg', { eager: true });
+const poster = Object.values(posters)[0]?.default;
+const START_TIME = 7.5;
+---
+
+<section class="hero" data-chapter="dawn" style="--bg: #0a3963" aria-labelledby="hero-title">
+  <div class="hero__inner wrap">
+    <div class="hero__copy">
+      <h1 id="hero-title" class="hero__title t-display">
+        <span class="hero__line"><span class="hero__line-inner">Solar power,</span></span>
+        <span class="hero__line"
+          ><span class="hero__line-inner"
+            >properly <span class="hero__wired"
+              >wired.<span class="hero__cable" aria-hidden="true"></span><span class="hero__terminal" aria-hidden="true"
+              ></span></span
+            ></span
+          ></span
+        >
+      </h1>
+      <p class="hero__lede t-lead">
+        JTEC Electrical Services designs, supplies and installs hybrid and grid-tied solar systems for homes and
+        businesses across Luzon. Every project is handled by licensed engineers.
+      </p>
+      <div class="hero__actions">
+        <a class="btn" href="/contact/">Request a quotation</a>
+        <a class="cable-link" href="/projects/"><span class="cable-link__wire" aria-hidden="true"></span>See our installations</a>
+      </div>
+    </div>
+
+    <div class="hero__stage">
+      <div class="hero__scene" data-state="poster">
+        {
+          poster && (
+            <Image
+              class="hero__poster"
+              src={poster}
+              alt="A house with a red corrugated roof, rooftop solar panels and a hybrid inverter and battery on its wall, standing among rice paddies"
+              loading="eager"
+              fetchpriority="high"
+              widths={[560, 820, 1120, 1400]}
+              sizes="(max-width: 860px) 100vw, 58vw"
+            />
+          )
+        }
+        <canvas class="hero__canvas" aria-hidden="true"></canvas>
+      </div>
+
+      <div class="day-panel" role="group" aria-labelledby="day-title" data-ready="false">
+        <div class="day-panel__head">
+          <p id="day-title" class="day-panel__title">A hybrid system, hour by hour</p>
+          <output class="day-panel__clock t-num" for="time-of-day">7:30 AM</output>
+        </div>
+        <div class="day-panel__control">
+          <label class="visually-hidden" for="time-of-day">Time of day</label>
+          <input
+            id="time-of-day"
+            class="day-panel__range"
+            type="range"
+            min="5"
+            max="21"
+            step="0.0833333"
+            value={START_TIME}
+            aria-valuetext="7:30 AM, morning"
+            style={`--fill:${((START_TIME - 5) / 16) * 100}%`}
+          />
+          <button class="day-panel__play" type="button" aria-pressed="false">
+            <svg viewBox="0 0 20 20" aria-hidden="true"
+              ><path class="icon-play" d="M6 4.5v11l9-5.5z"></path><path class="icon-pause" d="M5.5 4.5h3v11h-3zM11.5 4.5h3v11h-3z"
+              ></path></svg
+            >
+            <span class="day-panel__play-label">Play the day</span>
+          </button>
+        </div>
+        <dl class="day-panel__meters">
+          <div>
+            <dt>Panels</dt>
+            <dd><span class="meter" aria-hidden="true"><span data-meter="production"></span></span><span data-label="production">Producing</span></dd>
+          </div>
+          <div>
+            <dt>Battery</dt>
+            <dd><span class="meter" aria-hidden="true"><span data-meter="battery"></span></span><span data-label="battery">Charging</span></dd>
+          </div>
+        </dl>
+        <p class="day-panel__status" aria-live="polite">Morning: the panels run the house and charge the battery.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero__foot wrap">
+    <p>Based in {site.address.locality}, {site.address.province}. Working across Luzon.</p>
+    <a href={site.phoneHref}>Call {site.phoneDisplay}</a>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    min-height: 100svh;
+    padding-top: calc(var(--header-h) + clamp(16px, 4vh, 56px));
+    padding-bottom: clamp(20px, 3vh, 36px);
+    overflow: clip;
+    transition: background-color 600ms var(--ease);
+  }
+
+  .hero__inner {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    align-items: center;
+  }
+
+  .hero__copy {
+    position: relative;
+    z-index: 2;
+    grid-column: 1 / span 6;
+    grid-row: 1;
+    padding-block: clamp(12px, 3vh, 40px);
+  }
+
+  .hero__title {
+    --wdth-final: 112;
+    font-size: min(var(--step-display), 9.4vw);
+    font-variation-settings:
+      'wdth' var(--wdth, var(--wdth-final)),
+      'wght' var(--wght, 800);
+  }
+
+  .hero__line {
+    display: block;
+    white-space: nowrap;
+  }
+
+  .hero__line-inner {
+    display: inline-block;
+  }
+
+  .hero__wired {
+    position: relative;
+    display: inline-block;
+  }
+
+  /* the cable: a sagging line drawn with an elliptical bottom border, ending in a ring terminal */
+  .hero__cable {
+    position: absolute;
+    left: 0.02em;
+    right: 0.08em;
+    top: 0.78em;
+    height: 0.26em;
+    border-bottom: 0.066em solid var(--c-amber);
+    border-radius: 0 0 50% 50% / 0 0 100% 100%;
+    clip-path: inset(-0.1em 0 -0.1em 0);
+  }
+
+  .hero__terminal {
+    position: absolute;
+    right: -0.17em;
+    top: 0.68em;
+    width: 0.25em;
+    height: 0.25em;
+    border: 0.066em solid var(--c-amber);
+    border-radius: 50%;
+  }
+
+  .hero__lede {
+    max-width: 40ch;
+    margin-top: clamp(28px, 4vh, 44px);
+    color: var(--muted);
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px 32px;
+    margin-top: clamp(28px, 4vh, 40px);
+  }
+
+  /* ------------------------------------------------ stage */
+  .hero__stage {
+    position: relative;
+    grid-column: 7 / span 6;
+    grid-row: 1;
+    margin-right: calc(-1 * var(--margin));
+  }
+
+  .hero__scene {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1.12;
+    max-height: calc(100svh - var(--header-h) - 80px);
+    margin-left: auto;
+  }
+
+  @media (min-width: 861px) {
+    /* the sky fades into the field at the left edge instead of being cut off */
+    .hero__scene {
+      -webkit-mask-image: linear-gradient(to right, transparent 0, #000 14%);
+      mask-image: linear-gradient(to right, transparent 0, #000 14%);
+    }
+  }
+
+  .hero__poster,
+  .hero__canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .hero__poster {
+    object-fit: cover;
+    transition: opacity 700ms var(--ease);
+  }
+
+  .hero__canvas {
+    opacity: 0;
+    transition: opacity 700ms var(--ease);
+    touch-action: pan-y;
+  }
+
+  .hero__scene[data-state='live'] .hero__canvas {
+    opacity: 1;
+  }
+
+  .hero__scene[data-state='live'] .hero__poster {
+    opacity: 0;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .hero__scene[data-state='live'] .hero__canvas {
+      cursor: ew-resize;
+    }
+  }
+
+  /* ------------------------------------------------ time-of-day panel (glass surface #2) */
+  .day-panel {
+    position: absolute;
+    left: 0;
+    bottom: 7%;
+    z-index: 3;
+    width: min(380px, 72%);
+    padding: 18px 20px 16px;
+    color: var(--c-paper);
+    background: rgb(3 33 62 / 0.5);
+    -webkit-backdrop-filter: blur(16px) saturate(1.45);
+    backdrop-filter: blur(16px) saturate(1.45);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.14),
+      inset 0 0 0 1px rgb(255 255 255 / 0.06),
+      0 24px 48px -24px rgb(0 10 25 / 0.55);
+  }
+
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .day-panel {
+      background: #062f55;
+    }
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    .day-panel {
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+      background: #062f55;
+    }
+  }
+
+  /* the control needs the 3D scene; without JavaScript only the still image shows */
+  :global(html:not(.js)) .day-panel {
+    display: none;
+  }
+
+  .day-panel[data-ready='false'] .day-panel__control,
+  .day-panel[data-ready='false'] .day-panel__meters {
+    opacity: 0.55;
+  }
+
+  .day-panel__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .day-panel__title {
+    font-size: var(--step-small);
+    font-weight: 600;
+    font-stretch: 104%;
+    color: rgb(244 243 238 / 0.82);
+  }
+
+  .day-panel__clock {
+    font-size: 1.75rem;
+    font-weight: 760;
+    font-stretch: 108%;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .day-panel__control {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 8px;
+    transition: opacity var(--t-colour) var(--ease);
+  }
+
+  .day-panel__range {
+    flex: 1;
+    min-width: 0;
+    height: 44px;
+    margin: 0;
+    background: transparent;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .day-panel__range::-webkit-slider-runnable-track {
+    height: 4px;
+    border-radius: 2px;
+    background: linear-gradient(to right, var(--c-amber) var(--fill), rgb(244 243 238 / 0.22) var(--fill));
+  }
+
+  .day-panel__range::-moz-range-track {
+    height: 4px;
+    border-radius: 2px;
+    background: rgb(244 243 238 / 0.22);
+  }
+
+  .day-panel__range::-moz-range-progress {
+    height: 4px;
+    border-radius: 2px;
+    background: var(--c-amber);
+  }
+
+  .day-panel__range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 26px;
+    height: 26px;
+    margin-top: -11px;
+    border: 4px solid #052a4c;
+    border-radius: 50%;
+    background: var(--c-amber);
+    box-shadow: 0 0 0 4px rgb(255 179 3 / 0.28);
+    transition: box-shadow var(--t-colour) var(--ease);
+  }
+
+  .day-panel__range::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border: 4px solid #052a4c;
+    border-radius: 50%;
+    background: var(--c-amber);
+    box-shadow: 0 0 0 4px rgb(255 179 3 / 0.28);
+  }
+
+  .day-panel__range:hover::-webkit-slider-thumb,
+  .day-panel__range:active::-webkit-slider-thumb {
+    box-shadow: 0 0 0 9px rgb(255 179 3 / 0.22);
+  }
+
+  .day-panel__range:focus-visible {
+    border-radius: 6px;
+  }
+
+  .day-panel__play {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 14px 0 10px;
+    border: 0;
+    background: rgb(244 243 238 / 0.1);
+    color: inherit;
+    font-size: var(--step-small);
+    font-weight: 620;
+    white-space: nowrap;
+    transition: background-color var(--t-colour) var(--ease);
+  }
+
+  .day-panel__play:hover {
+    background: rgb(244 243 238 / 0.18);
+  }
+
+  .day-panel__play:active {
+    background: rgb(244 243 238 / 0.24);
+  }
+
+  .day-panel__play svg {
+    width: 18px;
+    height: 18px;
+    fill: var(--c-amber);
+  }
+
+  .day-panel__play .icon-pause,
+  .day-panel__play[aria-pressed='true'] .icon-play {
+    display: none;
+  }
+
+  .day-panel__play[aria-pressed='true'] .icon-pause {
+    display: inline;
+  }
+
+  .day-panel__meters {
+    display: grid;
+    gap: 6px;
+    margin-top: 6px;
+    transition: opacity var(--t-colour) var(--ease);
+  }
+
+  .day-panel__meters > div {
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .day-panel__meters dt {
+    font-size: var(--step-small);
+    font-weight: 600;
+    color: rgb(244 243 238 / 0.82);
+  }
+
+  .day-panel__meters dd {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 12px;
+    font-size: var(--step-small);
+    font-weight: 560;
+  }
+
+  .meter {
+    position: relative;
+    height: 6px;
+    background: rgb(244 243 238 / 0.16);
+    overflow: hidden;
+  }
+
+  .meter span {
+    position: absolute;
+    inset: 0;
+    background: var(--c-amber);
+    transform-origin: left;
+    transform: scaleX(var(--level, 0.5));
+    transition: transform 380ms var(--ease);
+  }
+
+  .day-panel__status {
+    margin-top: 12px;
+    font-size: var(--step-small);
+    line-height: 1.45;
+    color: rgb(244 243 238 / 0.86);
+    min-height: 2.9em;
+  }
+
+  /* ------------------------------------------------ foot */
+  .hero__foot {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 6px 24px;
+    padding-top: 20px;
+    font-size: var(--step-small);
+    font-weight: 520;
+    color: var(--muted);
+  }
+
+  .hero__foot a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    margin-block: -12px;
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .hero__foot a:hover {
+    color: var(--c-amber);
+  }
+
+  /* ------------------------------------------------ entrance (only while motion is on) */
+  :global(.motion) .hero:not(.is-intro-done) .hero__line-inner,
+  :global(.motion) .hero:not(.is-intro-done) .hero__lede,
+  :global(.motion) .hero:not(.is-intro-done) .hero__actions,
+  :global(.motion) .hero:not(.is-intro-done) .day-panel,
+  :global(.motion) .hero:not(.is-intro-done) .hero__foot {
+    opacity: 0;
+  }
+
+  :global(.motion) .hero:not(.is-intro-done) .hero__cable {
+    clip-path: inset(-0.1em 100% -0.1em 0);
+  }
+
+  :global(.motion) .hero:not(.is-intro-done) .hero__terminal {
+    transform: scale(0);
+  }
+
+  /* ------------------------------------------------ smaller screens */
+  /* narrower desktops: the control moves under the scene so it never covers the copy */
+  @media (max-width: 1180px) and (min-width: 861px) {
+    .day-panel {
+      position: relative;
+      left: auto;
+      bottom: auto;
+      width: auto;
+      margin: -28px 0 0 0;
+    }
+  }
+
+  @media (max-width: 860px) {
+    .hero {
+      min-height: auto;
+      padding-top: calc(var(--header-h) + 28px);
+    }
+    .hero__copy,
+    .hero__stage {
+      grid-column: 1 / -1;
+      grid-row: auto;
+    }
+    .hero__stage {
+      margin: 8px calc(-1 * var(--margin)) 0;
+    }
+    .hero__scene {
+      aspect-ratio: 1 / 0.92;
+      max-height: none;
+    }
+    .day-panel {
+      position: relative;
+      left: auto;
+      bottom: auto;
+      width: auto;
+      margin: -36px var(--margin) 0;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .hero__title {
+      --wdth-final: 100;
+      font-size: min(var(--step-display), 10.6vw);
+    }
+    .hero__lede {
+      max-width: none;
+    }
+  }
+</style>
+
+<script>
+  import { gsap } from 'gsap';
+  import type { HeroScene, SceneState } from '../../scripts/hero-scene';
+
+  const hero = document.querySelector<HTMLElement>('.hero');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (hero) {
+    const root = document.documentElement;
+    const title = hero.querySelector<HTMLElement>('.hero__title')!;
+    const lines = hero.querySelectorAll<HTMLElement>('.hero__line-inner');
+    const cable = hero.querySelector<HTMLElement>('.hero__cable')!;
+    const terminal = hero.querySelector<HTMLElement>('.hero__terminal')!;
+    const scene = hero.querySelector<HTMLElement>('.hero__scene')!;
+    const canvas = hero.querySelector<HTMLCanvasElement>('.hero__canvas')!;
+    const panel = hero.querySelector<HTMLElement>('.day-panel')!;
+    const range = panel.querySelector<HTMLInputElement>('.day-panel__range')!;
+    const clock = panel.querySelector<HTMLOutputElement>('.day-panel__clock')!;
+    const play = panel.querySelector<HTMLButtonElement>('.day-panel__play')!;
+    const playLabel = play.querySelector<HTMLElement>('.day-panel__play-label')!;
+    const status = panel.querySelector<HTMLElement>('.day-panel__status')!;
+    const meterProduction = panel.querySelector<HTMLElement>('[data-meter="production"]')!;
+    const meterBattery = panel.querySelector<HTMLElement>('[data-meter="battery"]')!;
+    const labelProduction = panel.querySelector<HTMLElement>('[data-label="production"]')!;
+    const labelBattery = panel.querySelector<HTMLElement>('[data-label="battery"]')!;
+
+    // ---------------------------------------------------------------- the headline powers up
+    if (root.classList.contains('motion')) {
+      const finalWidth = parseFloat(getComputedStyle(title).getPropertyValue('--wdth-final')) || 112;
+      const others = hero.querySelectorAll<HTMLElement>('.hero__lede, .hero__actions, .day-panel, .hero__foot');
+      const tl = gsap.timeline({
+        defaults: { ease: 'power3.out' },
+        onComplete: () => {
+          // hand the final state back to CSS
+          hero.classList.add('is-intro-done');
+          gsap.set(lines, { clearProps: '--wdth,--wght,transform,opacity' });
+          gsap.set(others, { clearProps: 'transform,opacity' });
+          gsap.set([cable, terminal], { clearProps: 'all' });
+        },
+      });
+      tl.fromTo(
+        lines,
+        { '--wdth': 62, '--wght': 280, yPercent: 24, opacity: 0 },
+        { '--wdth': finalWidth, '--wght': 800, yPercent: 0, opacity: 1, duration: 1.05, stagger: 0.11 },
+      )
+        .fromTo(
+          cable,
+          { clipPath: 'inset(-0.1em 100% -0.1em 0em)' },
+          { clipPath: 'inset(-0.1em 0% -0.1em 0em)', duration: 0.85, ease: 'power2.inOut' },
+          0.62,
+        )
+        .fromTo(terminal, { scale: 0 }, { scale: 1, duration: 0.45, ease: 'back.out(3)' }, 1.32)
+        .fromTo(others, { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.85, stagger: 0.08 }, 0.42);
+    }
+
+    // ---------------------------------------------------------------- the live day
+    const format = (h: number) => {
+      const total = Math.round(h * 60);
+      const hh = Math.floor(total / 60) % 24;
+      const mm = total % 60;
+      const suffix = hh >= 12 ? 'PM' : 'AM';
+      const h12 = hh % 12 === 0 ? 12 : hh % 12;
+      return `${h12}:${String(mm).padStart(2, '0')} ${suffix}`;
+    };
+
+    const phase = (s: SceneState) => {
+      const t = s.time;
+      if (t < 5.75) return { name: 'before sunrise', line: 'Before sunrise: the battery is running the house.' };
+      if (t < 7) return { name: 'sunrise', line: 'Sunrise: the panels start producing.' };
+      if (t < 11) return { name: 'morning', line: 'Morning: the panels run the house and charge the battery.' };
+      if (t < 13.5) return { name: 'midday', line: 'Midday: peak sun, and the battery fills up.' };
+      if (t < 17) {
+        return s.battery > 0.98
+          ? { name: 'afternoon', line: 'Afternoon: the battery is full and the panels still run the house.' }
+          : { name: 'afternoon', line: 'Afternoon: the panels run the house and top up the battery.' };
+      }
+      if (t < 18) return { name: 'sunset', line: 'Sunset: production fades and the battery gets ready to take over.' };
+      return { name: 'night', line: 'After dark: the battery runs the house and the lights stay on.' };
+    };
+
+    let api: HeroScene | null = null;
+    let current = Number(range.value);
+
+    const paint = (s: SceneState) => {
+      const p = phase(s);
+      clock.textContent = format(s.time);
+      range.setAttribute('aria-valuetext', `${format(s.time)}, ${p.name}`);
+      range.style.setProperty('--fill', `${((s.time - 5) / 16) * 100}%`);
+      meterProduction.style.setProperty('--level', String(Math.max(0.02, s.production)));
+      meterBattery.style.setProperty('--level', String(s.battery));
+      labelProduction.textContent = s.production > 0.04 ? 'Producing' : 'Resting';
+      labelBattery.textContent =
+        s.production <= 0.04 ? 'Running the house' : s.battery > 0.99 ? 'Full' : 'Charging';
+      hero.style.setProperty('--bg', s.sky);
+      return p;
+    };
+
+    const announce = () => {
+      if (!api) return;
+      const s = api.setTime(current);
+      status.textContent = phase(s).line;
+    };
+
+    const setTime = (h: number, speak = false) => {
+      current = Math.min(21, Math.max(5, h));
+      range.value = String(current);
+      if (!api) return;
+      const s = api.setTime(current);
+      const p = paint(s);
+      if (speak) status.textContent = p.line;
+    };
+
+    // the intro glide hands over to the visitor the moment they touch the control
+    let glide: gsap.core.Tween | null = null;
+    const takeOver = () => {
+      glide?.kill();
+      glide = null;
+    };
+
+    range.addEventListener('input', () => {
+      takeOver();
+      stopPlaying();
+      setTime(Number(range.value));
+    });
+    range.addEventListener('change', announce);
+
+    // Play the day: 5 AM to 9 PM in about twelve seconds, with a pause control.
+    let playing = false;
+    let playRaf = 0;
+    let lastTick = 0;
+    const stopPlaying = (speak = false) => {
+      if (!playing) return;
+      playing = false;
+      cancelAnimationFrame(playRaf);
+      play.setAttribute('aria-pressed', 'false');
+      playLabel.textContent = 'Play the day';
+      if (speak) announce();
+    };
+    const tick = (now: number) => {
+      const dt = Math.min(0.05, (now - lastTick) / 1000);
+      lastTick = now;
+      setTime(current + dt * (16 / 12));
+      if (current >= 21) {
+        stopPlaying(true);
+        return;
+      }
+      playRaf = requestAnimationFrame(tick);
+    };
+    play.addEventListener('click', () => {
+      if (playing) {
+        stopPlaying(true);
+        return;
+      }
+      takeOver();
+      if (current >= 20.9) setTime(5);
+      playing = true;
+      play.setAttribute('aria-pressed', 'true');
+      playLabel.textContent = 'Pause';
+      lastTick = performance.now();
+      playRaf = requestAnimationFrame(tick);
+    });
+
+    // Drag across the scene itself to scrub the day (mouse and pen; touch keeps scrolling the page).
+    let drag: { x: number; t: number } | null = null;
+    canvas.addEventListener('pointerdown', (e) => {
+      if (!api || e.pointerType === 'touch') return;
+      takeOver();
+      stopPlaying();
+      drag = { x: e.clientX, t: current };
+      canvas.setPointerCapture(e.pointerId);
+    });
+    canvas.addEventListener('pointermove', (e) => {
+      if (!drag) return;
+      const dx = (e.clientX - drag.x) / canvas.clientWidth;
+      setTime(drag.t + dx * 12);
+    });
+    const endDrag = () => {
+      if (!drag) return;
+      drag = null;
+      announce();
+    };
+    canvas.addEventListener('pointerup', endDrag);
+    canvas.addEventListener('pointercancel', endDrag);
+
+    // ---------------------------------------------------------------- start the 3D scene
+    const fallback = () => {
+      scene.dataset.state = 'poster';
+      panel.hidden = true;
+    };
+
+    const start = async () => {
+      try {
+        const { createHeroScene } = await import('../../scripts/hero-scene');
+        api = createHeroScene(canvas, {
+          reducedMotion: reduce,
+          mobile: window.matchMedia('(max-width: 860px)').matches,
+        });
+      } catch (err) {
+        console.warn('3D scene unavailable, showing the still image instead.', err);
+        fallback();
+        return;
+      }
+      canvas.addEventListener('scene:lost', fallback);
+      paint(api.setTime(current));
+      requestAnimationFrame(() => {
+        scene.dataset.state = 'live';
+        panel.dataset.ready = 'true';
+      });
+
+      // a short sunrise-to-morning glide shows the scene is alive, then it rests
+      if (!reduce) {
+        const sunrise = { t: current };
+        glide = gsap.to(sunrise, {
+          t: 9.1,
+          duration: 2.8,
+          delay: 0.5,
+          ease: 'power1.inOut',
+          onUpdate: () => setTime(sunrise.t),
+          onComplete: () => {
+            glide = null;
+            announce();
+          },
+        });
+      }
+
+      // pointer depth, scroll orbit, and pausing when off screen
+      if (window.matchMedia('(hover: hover) and (pointer: fine)').matches && !reduce) {
+        hero.addEventListener('pointermove', (e) => {
+          api?.setPointer((e.clientX / window.innerWidth) * 2 - 1, (e.clientY / window.innerHeight) * 2 - 1);
+        });
+      }
+      if (!reduce) {
+        const onScroll = () => api?.setScroll(Math.min(1, Math.max(0, window.scrollY / hero.offsetHeight)));
+        window.addEventListener('scroll', onScroll, { passive: true });
+      }
+      new IntersectionObserver((entries) => {
+        const visible = entries.some((e) => e.isIntersecting);
+        api?.setActive(visible);
+        if (!visible) stopPlaying();
+      }).observe(hero);
+      document.addEventListener('visibilitychange', () => api?.setActive(!document.hidden));
+      new ResizeObserver(() => api?.resize()).observe(canvas);
+    };
+
+    const idle = (cb: () => void) =>
+      'requestIdleCallback' in window ? window.requestIdleCallback(cb, { timeout: 900 }) : setTimeout(cb, 120);
+    if (document.readyState === 'complete') idle(start);
+    else window.addEventListener('load', () => idle(start), { once: true });
+  }
+</script>

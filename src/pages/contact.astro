@@ -1,0 +1,183 @@
+---
+import Base from '../layouts/Base.astro';
+import QuoteForm from '../components/QuoteForm.astro';
+import MapSection from '../components/MapSection.astro';
+import { site } from '../data/site';
+---
+
+<Base
+  title="Request a quotation | JTEC Electrical Services"
+  description={`Request a solar or electrical quotation from JTEC Electrical Services. Call ${site.phoneDisplay}, email ${site.email}, or send the quotation request form. Based in ${site.address.locality}, ${site.address.province}.`}
+  firstChapter="stone"
+  footerCta={false}
+>
+  <section class="ct" data-chapter="stone" aria-labelledby="page-title">
+    <div class="wrap ct__grid">
+      <div class="ct__intro">
+        <h1 id="page-title" class="t-display ct__title" data-reveal>Request a quotation</h1>
+        <p class="t-lead ct__lede" data-reveal>
+          Tell JTEC about the property and what you want to power. You get a detailed quotation by email: system
+          components, pricing, scope of work and warranties.
+        </p>
+
+        <dl class="ct__direct" data-reveal>
+          <div>
+            <dt>Call or text</dt>
+            <dd><a href={site.phoneHref}>{site.phoneDisplay}</a></dd>
+          </div>
+          <div>
+            <dt>Email</dt>
+            <dd><a href={`mailto:${site.email}`}>{site.email}</a></dd>
+          </div>
+          <div>
+            <dt>Office</dt>
+            <dd>
+              {site.address.locality}, {site.address.province}
+              <a class="cable-link ct__maps" href={site.mapsUrl} target="_blank" rel="noopener"
+                ><span class="cable-link__wire" aria-hidden="true"></span>Open in Google Maps<span class="visually-hidden">
+                  (opens in a new tab)</span
+                ></a
+              >
+            </dd>
+          </div>
+        </dl>
+
+        <div class="ct__ready" data-reveal>
+          <h2 class="ct__ready-title">Useful to have ready</h2>
+          <ul>
+            <li>A recent electricity bill, for the load and the cost analysis</li>
+            <li>Photos of the roof and of the main electrical panel</li>
+            <li>The appliances you most want to keep running</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="ct__form" data-reveal="fade">
+        <QuoteForm />
+      </div>
+    </div>
+  </section>
+
+  <MapSection
+    id="reach"
+    title="Based in Pura, Tarlac."
+    intro="The office is in Linao, Pura, and the work reaches across Luzon: the installation log runs from Pangasinan and Tarlac to Bulacan, Quezon City and Antipolo."
+    showLists={false}
+  />
+</Base>
+
+<style>
+  .ct {
+    padding-top: calc(var(--header-h) + clamp(48px, 9vh, 120px));
+    padding-bottom: var(--section-y);
+  }
+
+  .ct__grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    row-gap: 56px;
+    align-items: start;
+  }
+
+  .ct__intro {
+    grid-column: 1 / span 5;
+    position: sticky;
+    top: calc(var(--header-h) + 32px);
+  }
+
+  .ct__title {
+    font-size: min(var(--step-display), 6.6vw);
+  }
+
+  .ct__lede {
+    margin-top: clamp(24px, 3vw, 36px);
+    max-width: 34ch;
+  }
+
+  .ct__direct {
+    display: grid;
+    gap: 18px;
+    margin-top: clamp(32px, 4vw, 48px);
+  }
+
+  .ct__direct dt {
+    font-size: var(--step-small);
+    font-weight: 600;
+    color: var(--muted);
+  }
+
+  .ct__direct dd {
+    display: grid;
+    justify-items: start;
+    font-size: var(--step-lead);
+    font-weight: 640;
+    font-stretch: 104%;
+    letter-spacing: -0.012em;
+    overflow-wrap: anywhere;
+  }
+
+  .ct__direct dd > a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    text-decoration: none;
+    transition: color var(--t-colour) var(--ease);
+  }
+
+  .ct__direct dd > a:hover {
+    color: var(--c-blue);
+  }
+
+  .ct__maps {
+    font-size: var(--step-body);
+    margin-top: 4px;
+  }
+
+  .ct__ready {
+    margin-top: clamp(32px, 4vw, 48px);
+  }
+
+  .ct__ready-title {
+    font-size: var(--step-body);
+    font-weight: 700;
+  }
+
+  .ct__ready ul {
+    display: grid;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .ct__ready li {
+    position: relative;
+    padding-left: 26px;
+    color: var(--muted);
+  }
+
+  .ct__ready li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.45em;
+    width: 12px;
+    height: 12px;
+    border: 2.5px solid var(--c-blue);
+    border-radius: 50%;
+  }
+
+  .ct__form {
+    grid-column: 7 / span 6;
+  }
+
+  @media (max-width: 1000px) {
+    .ct__intro,
+    .ct__form {
+      grid-column: 1 / -1;
+      position: static;
+    }
+    .ct__title {
+      font-size: min(var(--step-display), 12vw);
+    }
+  }
+</style>

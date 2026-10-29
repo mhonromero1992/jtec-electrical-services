@@ -1,0 +1,466 @@
+---
+import { site } from '../data/site';
+import { services } from '../data/services';
+---
+
+<form
+  class="qform"
+  novalidate
+  data-email={site.email}
+  action={`mailto:${site.email}?subject=Quotation%20request`}
+  method="post"
+  enctype="text/plain"
+  aria-labelledby="qform-title"
+>
+  <h2 id="qform-title" class="qform__title">Quotation request</h2>
+  <p class="qform__note">
+    Fields marked <span aria-hidden="true">*</span><span class="visually-hidden">with an asterisk</span> are needed for the
+    quotation. Sending opens your email app with the request written out.
+  </p>
+
+  <div class="qform__row">
+    <div class="field">
+      <label for="q-name">Full name <span aria-hidden="true">*</span></label>
+      <input id="q-name" name="name" type="text" autocomplete="name" required aria-describedby="q-name-err" />
+      <p class="field__error" id="q-name-err" hidden></p>
+    </div>
+    <div class="field">
+      <label for="q-phone">Mobile number <span aria-hidden="true">*</span></label>
+      <input
+        id="q-phone"
+        name="phone"
+        type="tel"
+        inputmode="tel"
+        autocomplete="tel"
+        required
+        aria-describedby="q-phone-hint q-phone-err"
+      />
+      <p class="field__hint" id="q-phone-hint">For a call or text about the site visit.</p>
+      <p class="field__error" id="q-phone-err" hidden></p>
+    </div>
+  </div>
+
+  <div class="field">
+    <label for="q-email">Email address <span aria-hidden="true">*</span></label>
+    <input id="q-email" name="email" type="email" autocomplete="email" required aria-describedby="q-email-hint q-email-err" />
+    <p class="field__hint" id="q-email-hint">The quotation is sent to this address.</p>
+    <p class="field__error" id="q-email-err" hidden></p>
+  </div>
+
+  <div class="field">
+    <label for="q-location">Where is the property? <span aria-hidden="true">*</span></label>
+    <input
+      id="q-location"
+      name="location"
+      type="text"
+      autocomplete="address-level2"
+      required
+      aria-describedby="q-location-hint q-location-err"
+    />
+    <p class="field__hint" id="q-location-hint">Barangay or subdivision, town or city, and province.</p>
+    <p class="field__error" id="q-location-err" hidden></p>
+  </div>
+
+  <fieldset class="field field--choices">
+    <legend>Property</legend>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="property" value="Home" checked /><span>Home</span></label>
+      <label class="choice"><input type="radio" name="property" value="Business" /><span>Business</span></label>
+      <label class="choice"><input type="radio" name="property" value="Industrial site" /><span>Industrial site</span></label>
+    </div>
+  </fieldset>
+
+  <fieldset class="field field--choices" aria-describedby="q-need-err">
+    <legend>What do you need? <span aria-hidden="true">*</span></legend>
+    <div class="choices">
+      {
+        services
+          .filter((s) => s.slug !== 'quotation-proposal')
+          .map((s, i) => (
+            <label class="choice">
+              <input type="checkbox" name="need" value={s.name} checked={i === 0} />
+              <span>{s.name}</span>
+            </label>
+          ))
+      }
+    </div>
+    <p class="field__error" id="q-need-err" hidden></p>
+  </fieldset>
+
+  <fieldset class="field field--choices">
+    <legend>Solar system preference</legend>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="system" value="Hybrid, with battery" /><span>Hybrid, with battery</span></label>
+      <label class="choice"><input type="radio" name="system" value="Grid-tied" /><span>Grid-tied</span></label>
+      <label class="choice"><input type="radio" name="system" value="Not sure yet" checked /><span>Not sure yet</span></label>
+    </div>
+  </fieldset>
+
+  <div class="field">
+    <label for="q-bill">Average monthly electricity bill <span class="field__optional">(optional)</span></label>
+    <input id="q-bill" name="bill" type="text" inputmode="decimal" aria-describedby="q-bill-hint" />
+    <p class="field__hint" id="q-bill-hint">In pesos. It helps with the first sizing of a solar system.</p>
+  </div>
+
+  <div class="field">
+    <label for="q-message">Anything else JTEC should know <span class="field__optional">(optional)</span></label>
+    <textarea id="q-message" name="message" rows="4"></textarea>
+  </div>
+
+  <div class="qform__actions">
+    <button class="btn" type="submit">Write the request email</button>
+    <a class="cable-link" href={site.phoneHref}><span class="cable-link__wire" aria-hidden="true"></span>Or call {site.phoneDisplay}</a>
+  </div>
+
+  <div class="qform__done" role="status" tabindex="-1" hidden>
+    <p class="qform__done-title">Your email app should now be open with the request filled in.</p>
+    <p>
+      Send it from there. If nothing opened, copy the request and send it to
+      <a href={`mailto:${site.email}`}>{site.email}</a>.
+    </p>
+    <label class="visually-hidden" for="q-summary">Your request</label>
+    <textarea id="q-summary" class="qform__summary" rows="8" readonly></textarea>
+    <div class="qform__done-actions">
+      <button type="button" class="btn btn--small qform__copy">Copy the request</button>
+      <span class="qform__copied" aria-live="polite"></span>
+    </div>
+  </div>
+</form>
+
+<style>
+  .qform {
+    display: grid;
+    gap: 22px;
+    padding: clamp(24px, 3.5vw, 48px);
+    background: var(--c-paper);
+    color: var(--c-ink);
+    --bg: var(--c-paper);
+    --surface: #e9e7df;
+    --muted: #405468;
+    --focus: var(--c-blue);
+  }
+
+  .qform__title {
+    font-size: clamp(1.75rem, 1.2rem + 1.6vw, 2.5rem);
+    font-weight: 780;
+    font-stretch: 106%;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+  }
+
+  .qform__note {
+    margin-top: -8px;
+    font-size: var(--step-small);
+    color: var(--muted);
+  }
+
+  .qform__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px var(--gutter);
+    align-items: start;
+  }
+
+  .field {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+  }
+
+  .field label,
+  .field legend {
+    padding: 0;
+    font-size: var(--step-small);
+    font-weight: 650;
+  }
+
+  .field legend {
+    margin-bottom: 8px;
+  }
+
+  .field__optional {
+    font-weight: 500;
+    color: var(--muted);
+  }
+
+  .field input[type='text'],
+  .field input[type='tel'],
+  .field input[type='email'],
+  .field textarea {
+    width: 100%;
+    min-height: 52px;
+    padding: 12px 14px;
+    border: 0;
+    border-radius: 0;
+    background: var(--surface);
+    box-shadow: inset 0 -2px 0 rgb(6 34 61 / 0.28);
+    font-size: 1rem;
+    transition:
+      box-shadow var(--t-colour) var(--ease),
+      background-color var(--t-colour) var(--ease);
+  }
+
+  .field textarea {
+    resize: vertical;
+    line-height: 1.5;
+  }
+
+  .field input:hover,
+  .field textarea:hover {
+    background: #e2e0d7;
+  }
+
+  .field input:focus-visible,
+  .field textarea:focus-visible {
+    outline: 2px solid transparent;
+    box-shadow:
+      inset 0 -3px 0 var(--c-blue),
+      0 0 0 2px var(--bg),
+      0 0 0 5px color-mix(in srgb, var(--c-blue) 55%, transparent);
+    border-radius: 0;
+  }
+
+  .field input[aria-invalid='true'] {
+    box-shadow: inset 0 -3px 0 #b3261e;
+  }
+
+  .field__hint {
+    font-size: var(--step-small);
+    color: var(--muted);
+  }
+
+  .field__error {
+    font-size: var(--step-small);
+    font-weight: 600;
+    color: #b3261e;
+  }
+
+  .field__error::before {
+    content: '';
+    display: inline-block;
+    width: 0.7em;
+    height: 0.7em;
+    margin-right: 0.45em;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    vertical-align: -0.05em;
+  }
+
+  .choices {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .choice {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 0 14px 0 12px;
+    background: var(--surface);
+    font-size: var(--step-small);
+    font-weight: 560;
+    transition: background-color var(--t-colour) var(--ease);
+  }
+
+  .choice:hover {
+    background: #dfddd3;
+  }
+
+  .choice input {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    accent-color: var(--c-ink);
+  }
+
+  .choice:has(input:checked) {
+    background: var(--c-ink);
+    color: var(--c-paper);
+  }
+
+  .choice:has(input:checked) input {
+    accent-color: var(--c-amber);
+  }
+
+  .choice:has(input:focus-visible) {
+    box-shadow:
+      0 0 0 2px var(--bg),
+      0 0 0 5px color-mix(in srgb, var(--c-blue) 70%, transparent);
+  }
+
+  .choice input:focus-visible {
+    box-shadow: none;
+  }
+
+  .qform__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px 28px;
+    margin-top: 6px;
+  }
+
+  .qform__actions .btn {
+    --btn-bg: var(--c-amber);
+    --btn-ink: var(--c-ink);
+  }
+
+  .qform__actions .cable-link {
+    --cable: var(--c-blue);
+  }
+
+  .qform__done:not([hidden]) {
+    display: grid;
+    gap: 12px;
+    padding: 20px;
+    background: var(--surface);
+  }
+
+  .qform__done-title {
+    font-weight: 700;
+  }
+
+  .qform__summary {
+    width: 100%;
+    padding: 12px;
+    border: 0;
+    background: var(--c-paper);
+    font-size: var(--step-small);
+    line-height: 1.5;
+    resize: vertical;
+  }
+
+  .qform__done-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .qform__done-actions .btn {
+    --btn-bg: var(--c-ink);
+    --btn-ink: var(--c-paper);
+  }
+
+  .qform__copied {
+    font-size: var(--step-small);
+    font-weight: 600;
+  }
+
+  @media (max-width: 620px) {
+    .qform__row {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  // No form backend exists, so the request is written into an email for the visitor to send.
+  document.querySelectorAll<HTMLFormElement>('.qform').forEach((form) => {
+    const to = form.dataset.email ?? '';
+    const done = form.querySelector<HTMLElement>('.qform__done')!;
+    const summary = form.querySelector<HTMLTextAreaElement>('.qform__summary')!;
+    const copy = form.querySelector<HTMLButtonElement>('.qform__copy')!;
+    const copied = form.querySelector<HTMLElement>('.qform__copied')!;
+    const submit = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+
+    const field = (name: string) => form.elements.namedItem(name) as HTMLInputElement | null;
+    const setError = (input: HTMLInputElement | null, errorId: string, message: string) => {
+      const err = form.querySelector<HTMLElement>(`#${errorId}`);
+      if (!err) return;
+      err.textContent = message;
+      err.hidden = !message;
+      if (input) input.setAttribute('aria-invalid', String(Boolean(message)));
+    };
+
+    const validate = () => {
+      const problems: HTMLElement[] = [];
+      const name = field('name');
+      const phone = field('phone');
+      const email = field('email');
+      const location = field('location');
+
+      const nameOk = Boolean(name?.value.trim());
+      setError(name, 'q-name-err', nameOk ? '' : 'Enter your name.');
+      if (!nameOk && name) problems.push(name);
+
+      const digits = (phone?.value ?? '').replace(/\D/g, '');
+      const phoneOk = digits.length >= 7 && digits.length <= 15;
+      setError(phone, 'q-phone-err', phoneOk ? '' : 'Enter a mobile number JTEC can call or text.');
+      if (!phoneOk && phone) problems.push(phone);
+
+      const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email?.value.trim() ?? '');
+      setError(email, 'q-email-err', emailOk ? '' : 'Enter an email address, for example name@example.com.');
+      if (!emailOk && email) problems.push(email);
+
+      const locationOk = Boolean(location?.value.trim());
+      setError(location, 'q-location-err', locationOk ? '' : 'Enter where the property is.');
+      if (!locationOk && location) problems.push(location);
+
+      const needs = Array.from(form.querySelectorAll<HTMLInputElement>('input[name="need"]:checked'));
+      setError(null, 'q-need-err', needs.length ? '' : 'Choose at least one service.');
+      if (!needs.length) problems.push(form.querySelector<HTMLInputElement>('input[name="need"]')!);
+
+      return problems;
+    };
+
+    // clear an error as soon as the field is corrected
+    form.addEventListener('input', (e) => {
+      const t = e.target as HTMLInputElement;
+      if (t.getAttribute('aria-invalid') === 'true') validate();
+    });
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const problems = validate();
+      if (problems.length) {
+        problems[0].focus();
+        return;
+      }
+      const get = (n: string) => (field(n)?.value ?? '').trim();
+      const checked = (n: string) =>
+        Array.from(form.querySelectorAll<HTMLInputElement>(`input[name="${n}"]:checked`)).map((i) => i.value);
+      const property = checked('property')[0] ?? '';
+      const lines = [
+        'Quotation request',
+        '',
+        `Name: ${get('name')}`,
+        `Mobile: ${get('phone')}`,
+        `Email: ${get('email')}`,
+        `Property: ${property}, ${get('location')}`,
+        `Needs: ${checked('need').join('; ')}`,
+        `Solar system preference: ${checked('system')[0] ?? 'Not sure yet'}`,
+        `Average monthly bill: ${get('bill') ? `PHP ${get('bill')}` : 'Not given'}`,
+        '',
+        get('message') ? `Notes: ${get('message')}` : 'Notes: none',
+      ];
+      const body = lines.join('\n');
+      const subject = `Quotation request: ${property} in ${get('location')}`;
+      summary.value = `To: ${to}\nSubject: ${subject}\n\n${body}`;
+
+      submit.setAttribute('aria-busy', 'true');
+      window.location.href = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      window.setTimeout(() => {
+        submit.removeAttribute('aria-busy');
+        done.hidden = false;
+        done.focus();
+      }, 600);
+    });
+
+    copy.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(summary.value);
+        copied.textContent = 'Copied. Paste it into an email to JTEC.';
+      } catch {
+        summary.focus();
+        summary.select();
+        copied.textContent = 'Select all and copy the text above.';
+      }
+    });
+  });
+</script>

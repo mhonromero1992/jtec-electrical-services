@@ -1,0 +1,180 @@
+---
+import { Image } from 'astro:assets';
+import crew from '../../assets/photos/crew-two-panels.png';
+import electrician from '../../assets/photos/electrician-at-meter.jpg';
+import { site } from '../../data/site';
+---
+
+<section class="intro chapter" data-chapter="stone" aria-labelledby="intro-title">
+  <div class="wrap intro__grid">
+    <div class="intro__text">
+      <h2 id="intro-title" class="t-head" data-reveal>Good solar starts with good wiring.</h2>
+      <p class="t-lead intro__statement" data-reveal>
+        {site.name} is a growing electrical contractor. Through its division, {site.division}, it designs, supplies and
+        installs solar power systems.
+      </p>
+      <p class="intro__body measure" data-reveal>
+        With demand rising for sustainable, cost-efficient energy, JTEC builds solar systems for residential,
+        commercial and industrial clients: safe, efficient, long-lasting setups that lower energy costs. Licensed
+        engineers and skilled workers carry out every project with precision and in compliance with industry
+        standards.
+      </p>
+      <dl class="intro__facts" data-reveal>
+        <div>
+          <dt>Team</dt>
+          <dd>{site.workforce}</dd>
+        </div>
+        <div>
+          <dt>Engineering</dt>
+          <dd>Projects handled by licensed engineers</dd>
+        </div>
+        <div>
+          <dt>Clients</dt>
+          <dd>Residential, commercial and industrial</dd>
+        </div>
+      </dl>
+      <a class="cable-link intro__link" href="/about/" data-reveal
+        ><span class="cable-link__wire" aria-hidden="true"></span>About JTEC</a
+      >
+    </div>
+
+    <div class="intro__pictures">
+      <figure class="intro__work" data-reveal>
+        <Image
+          src={electrician}
+          alt="A JTEC electrician in a branded shirt working on a meter box mounted on a white wall"
+          widths={[320, 401]}
+          sizes="(max-width: 900px) 60vw, 300px"
+          loading="lazy"
+        />
+        <figcaption class="caption">Electrical work at the meter, where every solar job connects</figcaption>
+      </figure>
+      <figure class="intro__crew" data-reveal="fade">
+        <Image
+          src={crew}
+          alt="Five members of the JTEC crew standing between two solar panels held upright"
+          widths={[480, 760, 1000]}
+          sizes="(max-width: 900px) 92vw, 46vw"
+          loading="lazy"
+        />
+        <figcaption class="visually-hidden">Part of the JTEC crew with two solar panels</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<style>
+  .intro {
+    padding-bottom: 0;
+  }
+
+  .intro__grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    align-items: end;
+  }
+
+  .intro__text {
+    grid-column: 1 / span 6;
+    padding-bottom: var(--section-y);
+  }
+
+  .intro__statement {
+    margin-top: clamp(28px, 3vw, 40px);
+    max-width: 30ch;
+  }
+
+  .intro__body {
+    margin-top: 24px;
+  }
+
+  .intro__facts {
+    display: grid;
+    gap: 18px;
+    margin-top: clamp(36px, 4vw, 56px);
+  }
+
+  .intro__facts > div {
+    display: grid;
+    grid-template-columns: 9.5rem 1fr;
+    gap: 16px;
+    align-items: baseline;
+  }
+
+  .intro__facts dt {
+    font-size: var(--step-small);
+    font-weight: 600;
+    color: var(--muted);
+  }
+
+  .intro__facts dd {
+    font-size: var(--step-lead);
+    font-weight: 620;
+    font-stretch: 104%;
+    letter-spacing: -0.012em;
+    line-height: 1.25;
+  }
+
+  .intro__link {
+    margin-top: clamp(28px, 3vw, 40px);
+  }
+
+  .intro__pictures {
+    grid-column: 7 / span 6;
+    align-self: stretch;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    row-gap: 32px;
+  }
+
+  .intro__work {
+    justify-self: end;
+    width: min(300px, 52%);
+  }
+
+  .intro__work :global(img) {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    object-position: 50% 34%;
+  }
+
+  .intro__work .caption {
+    max-width: 30ch;
+  }
+
+  .intro__crew {
+    align-self: end;
+    margin-right: calc(-1 * var(--margin) * 0.5);
+  }
+
+  .intro__crew :global(img) {
+    width: 100%;
+    height: auto;
+  }
+
+  @media (max-width: 1100px) {
+    .intro__text,
+    .intro__pictures {
+      grid-column: 1 / -1;
+    }
+    .intro__text {
+      padding-bottom: 48px;
+    }
+    .intro__work {
+      justify-self: start;
+      width: min(300px, 64%);
+    }
+    .intro__crew {
+      margin-right: 0;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .intro__facts > div {
+      grid-template-columns: 1fr;
+      gap: 2px;
+    }
+  }
+</style>

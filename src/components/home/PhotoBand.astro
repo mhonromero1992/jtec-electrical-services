@@ -1,0 +1,86 @@
+---
+import { Image } from 'astro:assets';
+import urdaneta from '../../assets/photos/urdaneta-rooftop-rice-fields.jpg';
+---
+
+<figure class="band" data-chapter="navy">
+  <div class="band__frame">
+    <Image
+      class="band__img"
+      src={urdaneta}
+      alt="A JTEC rooftop solar array overlooking rice fields in Urdaneta, Pangasinan"
+      widths={[640, 960, 1280, 1691]}
+      sizes="100vw"
+      loading="lazy"
+    />
+  </div>
+  <figcaption class="band__caption wrap">
+    <span class="band__spec">9.9 kWp hybrid system with 314 Ah of battery capacity</span>
+    <span>Urdaneta, Pangasinan, December 2025</span>
+  </figcaption>
+</figure>
+
+<style>
+  .band {
+    position: relative;
+    padding-bottom: 28px;
+  }
+
+  .band__frame {
+    position: relative;
+    height: clamp(320px, 62vw, 860px);
+    overflow: hidden;
+  }
+
+  .band__frame :global(.band__img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 62%;
+  }
+
+  .band__caption {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 6px 24px;
+    padding-top: 20px;
+    font-size: var(--step-small);
+    font-weight: 520;
+    color: var(--muted);
+  }
+
+  .band__spec {
+    color: var(--ink);
+    font-weight: 620;
+  }
+</style>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  // The picture opens to the full width as it scrolls into view, and the photo settles inside it.
+  if (document.documentElement.classList.contains('motion')) {
+    gsap.registerPlugin(ScrollTrigger);
+    document.querySelectorAll<HTMLElement>('.band').forEach((band) => {
+      const frame = band.querySelector<HTMLElement>('.band__frame');
+      const img = band.querySelector<HTMLElement>('.band__img');
+      if (!frame || !img) return;
+      gsap.fromTo(
+        frame,
+        { clipPath: 'inset(9% 7% 9% 7%)' },
+        {
+          clipPath: 'inset(0% 0% 0% 0%)',
+          ease: 'none',
+          scrollTrigger: { trigger: band, start: 'top 92%', end: 'top 18%', scrub: 0.6 },
+        },
+      );
+      gsap.fromTo(
+        img,
+        { scale: 1.14 },
+        { scale: 1, ease: 'none', scrollTrigger: { trigger: band, start: 'top bottom', end: 'bottom top', scrub: 0.6 } },
+      );
+    });
+  }
+</script>

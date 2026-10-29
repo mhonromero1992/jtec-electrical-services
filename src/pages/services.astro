@@ -1,0 +1,297 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import ProcessCable from '../components/ProcessCable.astro';
+import crewOnArray from '../assets/photos/crew-on-array.jpg';
+import { services } from '../data/services';
+import { projects, formatKwp, hybridCount } from '../data/projects';
+
+const hybridExamples = projects.filter((p) => p.type === 'Hybrid' && p.location);
+const smallestHybrid = hybridExamples.reduce((a, b) => (b.kwp < a.kwp ? b : a));
+const largestBattery = hybridExamples.reduce((a, b) => ((b.batteryAh ?? 0) > (a.batteryAh ?? 0) ? b : a));
+const gridTied = projects.find((p) => p.type === 'Grid-tied')!;
+---
+
+<Base
+  title="Services | JTEC Electrical Services"
+  description="Solar installation, electrical design and planning, electrical installation and maintenance, solar consultation, and transparent quotations by email. JTEC Electrical Services, Pura, Tarlac."
+  firstChapter="blue"
+>
+  <section class="svc-hero" data-chapter="blue" aria-labelledby="page-title">
+    <div class="wrap svc-hero__grid">
+      <h1 id="page-title" class="t-display svc-hero__title" data-reveal>Solar and electrical services</h1>
+      <p class="t-lead svc-hero__lede" data-reveal>
+        From the first consultation to maintenance after handover, JTEC designs, supplies, installs and supports solar and
+        electrical systems for homes and businesses across Luzon.
+      </p>
+      <ul class="svc-hero__index" data-reveal aria-label="Services on this page">
+        {
+          services.map((s) => (
+            <li>
+              <a href={`#${s.slug}`}>{s.name}</a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+    <figure class="svc-hero__band" data-reveal="fade">
+      <Image
+        src={crewOnArray}
+        alt="Three members of the JTEC crew standing on a finished rooftop solar array, with trees behind them"
+        widths={[640, 960, 1241]}
+        sizes="100vw"
+        loading="eager"
+        fetchpriority="high"
+      />
+      <figcaption class="wrap caption">The crew on a finished rooftop array</figcaption>
+    </figure>
+  </section>
+
+  <section class="detail chapter" data-chapter="stone" aria-label="Service details">
+    <div class="wrap">
+      {
+        services.map((s, i) => (
+          <article class="detail__item" id={s.slug} aria-labelledby={`${s.slug}-title`}>
+            <figure class="detail__photo" data-reveal>
+              <Image src={s.image} alt={s.alt} widths={[360, 448]} sizes="(max-width: 900px) 92vw, 30vw" loading={i < 1 ? 'eager' : 'lazy'} />
+            </figure>
+            <div class="detail__text">
+              <h2 id={`${s.slug}-title`} class="detail__name" data-reveal>
+                {s.name}
+              </h2>
+              <p class="t-lead detail__body" data-reveal>
+                {s.text}
+              </p>
+              <ul class="detail__includes" data-reveal aria-label={`${s.name} includes`}>
+                {s.includes.map((x) => (
+                  <li>{x}</li>
+                ))}
+              </ul>
+            </div>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  <ProcessCable />
+
+  <section class="types chapter" data-chapter="amber" aria-labelledby="types-title">
+    <div class="wrap">
+      <h2 id="types-title" class="t-head types__title" data-reveal>Hybrid or grid-tied?</h2>
+      <p class="t-lead types__intro" data-reveal>
+        Both system types are in JTEC’s installation log. The consultation and site assessment decide which one suits the
+        property.
+      </p>
+      <div class="types__grid">
+        <article class="types__col" data-reveal>
+          <p class="types__count">{hybridCount}<span> of {projects.length}</span></p>
+          <h3 class="types__name">Hybrid, with battery storage</h3>
+          <p>
+            Panels, a hybrid inverter and a battery bank. During the day the panels supply the house and charge the
+            battery; after sunset the battery supplies the stored energy.
+          </p>
+          <p class="types__eg">
+            In the log: from {formatKwp(smallestHybrid.kwp)} with {smallestHybrid.batteryAh} Ah in {smallestHybrid.location}, to{' '}
+            {formatKwp(largestBattery.kwp)} with {largestBattery.batteryAh} Ah in {largestBattery.location}.
+          </p>
+        </article>
+        <article class="types__col" data-reveal>
+          <p class="types__count">1<span> of {projects.length}</span></p>
+          <h3 class="types__name">Grid-tied, without a battery</h3>
+          <p>
+            Panels and an inverter connected to the utility supply. Solar power is used as it is produced, so less
+            electricity is drawn from the grid during the day.
+          </p>
+          <p class="types__eg">
+            In the log: {formatKwp(gridTied.kwp)} in {gridTied.location}, March 2025.
+          </p>
+        </article>
+      </div>
+      <a class="cable-link types__link" href="/projects/" data-reveal
+        ><span class="cable-link__wire" aria-hidden="true"></span>See every installation</a
+      >
+    </div>
+  </section>
+</Base>
+
+<style>
+  .svc-hero {
+    padding-top: calc(var(--header-h) + clamp(48px, 9vh, 120px));
+  }
+
+  .svc-hero__grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    row-gap: 28px;
+    align-items: end;
+  }
+
+  .svc-hero__title {
+    grid-column: 1 / -1;
+    font-size: min(var(--step-display), 7.8vw);
+  }
+
+  .svc-hero__lede {
+    grid-column: 1 / span 6;
+    color: var(--muted);
+  }
+
+  .svc-hero__index {
+    grid-column: 8 / span 5;
+    display: grid;
+    gap: 2px;
+  }
+
+  .svc-hero__index a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    font-weight: 600;
+    font-stretch: 104%;
+    text-decoration: none;
+    transition: color var(--t-colour) var(--ease);
+  }
+
+  .svc-hero__index a:hover {
+    color: var(--c-amber);
+  }
+
+  .svc-hero__band {
+    margin-top: clamp(48px, 7vw, 96px);
+  }
+
+  .svc-hero__band :global(img) {
+    width: 100%;
+    height: clamp(260px, 34vw, 520px);
+    object-fit: cover;
+    object-position: 50% 40%;
+  }
+
+  .svc-hero__band .caption {
+    padding-block: 16px 28px;
+  }
+
+  /* ---------------------------------------------- details */
+  .detail__item {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    row-gap: 24px;
+    padding-block: clamp(40px, 5vw, 72px);
+    scroll-margin-top: calc(var(--header-h) + 8px);
+  }
+
+  .detail__item:first-child {
+    padding-top: 0;
+  }
+
+  .detail__photo {
+    grid-column: 1 / span 4;
+  }
+
+  .detail__photo :global(img) {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+
+  .detail__text {
+    grid-column: 6 / span 7;
+  }
+
+  .detail__name {
+    font-size: clamp(1.625rem, 1.1rem + 2.4vw, 3.25rem);
+    font-weight: 760;
+    font-stretch: 106%;
+    letter-spacing: -0.03em;
+    line-height: 1.02;
+    text-wrap: balance;
+  }
+
+  .detail__body {
+    margin-top: 20px;
+    max-width: 44ch;
+  }
+
+  .detail__includes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 24px;
+  }
+
+  .detail__includes li {
+    padding: 8px 14px;
+    background: var(--surface);
+    font-size: var(--step-small);
+    font-weight: 600;
+  }
+
+  /* ---------------------------------------------- types */
+  .types__title {
+    max-width: 14ch;
+  }
+
+  .types__intro {
+    margin-top: 24px;
+    max-width: 40ch;
+  }
+
+  .types__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(32px, 5vw, 80px);
+    margin-top: clamp(48px, 6vw, 88px);
+  }
+
+  .types__count {
+    font-size: clamp(3.5rem, 1.5rem + 6vw, 7.5rem);
+    font-weight: 800;
+    font-stretch: 112%;
+    letter-spacing: -0.05em;
+    line-height: 0.9;
+  }
+
+  .types__count span {
+    font-size: 0.32em;
+    letter-spacing: -0.02em;
+  }
+
+  .types__name {
+    margin-top: 24px;
+    font-size: var(--step-lead);
+    font-weight: 740;
+    font-stretch: 104%;
+    letter-spacing: -0.015em;
+  }
+
+  .types__col p {
+    margin-top: 12px;
+    max-width: 48ch;
+  }
+
+  .types__eg {
+    color: var(--muted);
+  }
+
+  .types__link {
+    margin-top: clamp(40px, 5vw, 64px);
+  }
+
+  @media (max-width: 900px) {
+    .svc-hero__title,
+    .svc-hero__lede,
+    .svc-hero__index {
+      grid-column: 1 / -1;
+    }
+    .detail__photo,
+    .detail__text {
+      grid-column: 1 / -1;
+    }
+    .types__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

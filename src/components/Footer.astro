@@ -1,0 +1,412 @@
+---
+import Logo from './Logo.astro';
+import { nav, site, process } from '../data/site';
+import { hybridCount, projects } from '../data/projects';
+
+interface Props {
+  cta?: boolean;
+}
+
+const { cta = true } = Astro.props;
+const year = new Date().getFullYear();
+
+// A row of Luzon houses for the night scene. Deterministic so builds are stable.
+type House = { x: number; w: number; h: number; roof: number; panels: boolean; windows: { x: number; y: number }[] };
+const houses: House[] = [];
+let x = -20;
+let seed = 7;
+const rand = () => {
+  seed = (seed * 9301 + 49297) % 233280;
+  return seed / 233280;
+};
+while (x < 1460) {
+  const w = 96 + Math.round(rand() * 90);
+  const h = 64 + Math.round(rand() * 70);
+  const roof = 22 + Math.round(rand() * 18);
+  const cols = Math.max(1, Math.floor((w - 28) / 34));
+  const rows = h > 110 ? 2 : 1;
+  const windows: { x: number; y: number }[] = [];
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      if (rand() > 0.82) continue;
+      windows.push({ x: x + 18 + c * 34, y: 260 - h + 18 + r * 40 });
+    }
+  }
+  houses.push({ x, w, h, roof, panels: rand() > 0.35, windows });
+  x += w + 10 + Math.round(rand() * 26);
+}
+let windowIndex = 0;
+
+// a street's utility poles with two sagging lines strung over the roofs
+const poleXs = [70, 390, 710, 1030, 1350];
+const lines: string[] = [];
+for (let i = 0; i < poleXs.length - 1; i++) {
+  const [a, b] = [poleXs[i], poleXs[i + 1]];
+  for (const [y, sag] of [
+    [62, 46],
+    [76, 40],
+  ]) {
+    lines.push(`M${a} ${y}Q${(a + b) / 2} ${y + sag * 2} ${b} ${y}`);
+  }
+}
+lines.push(`M-20 70Q25 92 ${poleXs[0]} 62`, `M${poleXs[poleXs.length - 1]} 62Q1400 92 1460 70`);
+const nextSteps = process.slice(0, 4);
+---
+
+<footer class="site-footer" data-chapter="night">
+  {
+    cta && (
+      <div class="footer-cta wrap" data-reveal-group>
+        <h2 class="t-head footer-cta__title" data-reveal>
+          After sunset, the battery takes over.
+        </h2>
+        <p class="t-lead footer-cta__text" data-reveal>
+          {hybridCount} of the {projects.length} systems in JTEC’s installation log are hybrid setups with battery
+          storage, so the power a roof makes by day is still there after dark.
+        </p>
+        <div class="footer-cta__actions" data-reveal>
+          <a class="btn" href="/contact/">Request a quotation</a>
+          <a class="cable-link" href={site.phoneHref}>
+            <span class="cable-link__wire" aria-hidden="true" />
+            Call {site.phoneDisplay}
+          </a>
+        </div>
+        <div class="footer-next" data-reveal>
+          <h3 class="footer-next__title">What happens after you ask</h3>
+          <ol class="footer-next__steps">
+            {nextSteps.map((s) => (
+              <li>
+                <span class="footer-next__name">{s.title}</span>
+                <span class="footer-next__text">{s.text}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </div>
+    )
+  }
+
+  <div class="night-scene" aria-hidden="true">
+    <svg viewBox="0 0 1440 300" preserveAspectRatio="xMidYMax slice">
+      <g class="night-scene__houses">
+        {
+          houses.map((h) => (
+            <g>
+              <path
+                class="house"
+                d={`M${h.x} 300V${260 - h.h}L${h.x + h.w / 2} ${260 - h.h - h.roof}L${h.x + h.w} ${260 - h.h}V300Z`}
+              />
+              {h.panels && (
+                <path
+                  class="panel"
+                  d={`M${h.x + h.w * 0.14} ${260 - h.h - h.roof * 0.28}L${h.x + h.w * 0.42} ${260 - h.h - h.roof * 0.84}L${h.x + h.w * 0.47} ${260 - h.h - h.roof * 0.72}L${h.x + h.w * 0.19} ${260 - h.h - h.roof * 0.16}Z`}
+                />
+              )}
+              {h.windows.map((w) => (
+                <rect class="win" x={w.x} y={w.y} width="16" height="22" style={`--i:${windowIndex++}`} />
+              ))}
+            </g>
+          ))
+        }
+      </g>
+      <g class="night-scene__poles">
+        {poleXs.map((px) => (
+          <g>
+            <rect x={px - 3} y="52" width="6" height="248" />
+            <rect x={px - 22} y="58" width="44" height="5" />
+          </g>
+        ))}
+      </g>
+      <g class="night-scene__lines">{lines.map((d) => <path d={d} />)}</g>
+    </svg>
+  </div>
+
+  <div class="footer-body wrap">
+    <nav class="footer-nav" id="footer-nav" aria-label="Footer">
+      <ul>
+        <li><a href="/">Home</a></li>
+        {
+          nav.map((item) => (
+            <li>
+              <a href={item.href}>{item.label}</a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+    <address class="footer-contact">
+      <a href={site.phoneHref}>{site.phoneDisplay}</a>
+      <a href={`mailto:${site.email}`}>{site.email}</a>
+      <a href={site.mapsUrl} rel="noopener" target="_blank">
+        {site.address.locality}, {site.address.province}
+        <span class="visually-hidden"> (opens Google Maps in a new tab)</span>
+      </a>
+    </address>
+    <p class="footer-note">
+      {site.division} is the solar division of {site.name}: solar power system design, supply and installation, with the
+      electrical work behind it.
+    </p>
+  </div>
+
+  <div class="footer-name wrap">
+    <Logo part="wordmark" class="footer-name__mark" />
+    <span class="visually-hidden">{site.name}</span>
+  </div>
+
+  <div class="footer-legal wrap">
+    <p>© {year} {site.name}. All rights reserved.</p>
+    <p>Map outlines: Natural Earth (public domain).</p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    --logo-navy: var(--c-paper);
+    --logo-ink: var(--c-paper);
+    position: relative;
+    overflow: hidden;
+    padding-bottom: max(28px, env(safe-area-inset-bottom));
+  }
+
+  .footer-cta {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    row-gap: 28px;
+    padding-top: var(--section-y);
+  }
+
+  .footer-cta__title {
+    grid-column: 1 / span 7;
+  }
+
+  .footer-cta__text {
+    grid-column: 1 / span 6;
+    color: var(--muted);
+  }
+
+  .footer-cta__actions {
+    grid-column: 1 / span 7;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 20px 32px;
+    margin-top: 12px;
+  }
+
+  .night-scene {
+    margin-top: clamp(56px, 8vw, 120px);
+    height: clamp(170px, 22vw, 300px);
+  }
+
+  .night-scene svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .house {
+    fill: #0b2a45;
+  }
+
+  .panel {
+    fill: #134a78;
+  }
+
+  .win {
+    fill: #0f3555;
+    transition:
+      fill 600ms var(--ease) calc(var(--i) * 45ms),
+      filter 600ms var(--ease) calc(var(--i) * 45ms);
+  }
+
+  .night-scene.is-lit .win,
+  :global(html:not(.motion)) .win {
+    fill: var(--c-amber);
+    filter: drop-shadow(0 0 6px rgb(255 179 3 / 0.55));
+  }
+
+  .night-scene__poles rect {
+    fill: #123553;
+  }
+
+  .night-scene__lines path {
+    fill: none;
+    stroke: var(--c-amber);
+    stroke-width: 2;
+    stroke-linecap: round;
+    opacity: 0.55;
+  }
+
+  .footer-next {
+    grid-column: 9 / span 4;
+    grid-row: 1 / span 3;
+    align-self: start;
+    padding-top: 0.6em;
+  }
+
+  .footer-next__title {
+    font-size: var(--step-body);
+    font-weight: 700;
+    font-stretch: 104%;
+  }
+
+  /* the steps hang off one cable, each at a ring terminal */
+  .footer-next__steps {
+    position: relative;
+    display: grid;
+    gap: 22px;
+    margin-top: 22px;
+    padding-left: 34px;
+  }
+
+  .footer-next__steps::before {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 10px;
+    bottom: 10px;
+    width: 2.5px;
+    background: var(--c-amber);
+    border-radius: 2px;
+  }
+
+  .footer-next__steps li {
+    position: relative;
+    display: grid;
+    gap: 2px;
+  }
+
+  .footer-next__steps li::before {
+    content: '';
+    position: absolute;
+    left: -34px;
+    top: 4px;
+    width: 17px;
+    height: 17px;
+    border-radius: 50%;
+    border: 2.5px solid var(--c-amber);
+    background: var(--bg);
+  }
+
+  .footer-next__name {
+    font-weight: 650;
+  }
+
+  .footer-next__text {
+    font-size: var(--step-small);
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .footer-body {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    row-gap: 32px;
+    padding-top: clamp(48px, 6vw, 80px);
+  }
+
+  .footer-nav {
+    grid-column: 1 / span 3;
+  }
+
+  .footer-nav ul {
+    display: grid;
+    gap: 2px;
+  }
+
+  .footer-nav a,
+  .footer-contact a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    text-decoration: none;
+    font-weight: 560;
+    transition: color var(--t-colour) var(--ease);
+  }
+
+  .footer-nav a:hover,
+  .footer-contact a:hover {
+    color: var(--c-amber);
+  }
+
+  .footer-contact {
+    grid-column: 4 / span 4;
+    display: grid;
+    align-content: start;
+    font-style: normal;
+  }
+
+  .footer-note {
+    grid-column: 9 / span 4;
+    color: var(--muted);
+    padding-top: 10px;
+  }
+
+  .footer-name {
+    padding-top: clamp(56px, 8vw, 120px);
+  }
+
+  .footer-name :global(.footer-name__mark) {
+    width: 100%;
+    height: auto;
+  }
+
+  .footer-legal {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px 24px;
+    padding-top: 28px;
+    font-size: var(--step-small);
+    color: var(--muted);
+  }
+
+  @media (max-width: 900px) {
+    .footer-cta__title,
+    .footer-cta__text,
+    .footer-cta__actions {
+      grid-column: 1 / -1;
+    }
+    .footer-next {
+      grid-column: 1 / -1;
+      grid-row: auto;
+      margin-top: 24px;
+    }
+    .footer-nav {
+      grid-column: 1 / span 5;
+    }
+    .footer-contact {
+      grid-column: 6 / -1;
+    }
+    .footer-note {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .footer-nav,
+    .footer-contact {
+      grid-column: 1 / -1;
+    }
+    .footer-contact a {
+      word-break: break-word;
+    }
+  }
+</style>
+
+<script>
+  const scene = document.querySelector<HTMLElement>('.night-scene');
+  if (scene) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          scene.classList.add('is-lit');
+          io.disconnect();
+        }
+      },
+      { threshold: 0.35 },
+    );
+    io.observe(scene);
+  }
+</script>

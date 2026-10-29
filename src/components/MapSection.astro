@@ -1,0 +1,499 @@
+---
+import map from '../data/luzon-map.json';
+import { projects, formatKwp, type Province } from '../data/projects';
+import { experience } from '../data/people';
+import { site, type ChapterName } from '../data/site';
+
+interface Props {
+  id?: string;
+  title: string;
+  intro: string;
+  chapter?: ChapterName;
+  showLists?: boolean;
+}
+
+const { id = 'map', title, intro, chapter = 'navy', showLists = true } = Astro.props;
+
+type Place = { label: string; xy: number[] };
+const places = map.places as Record<string, Place>;
+
+// solar installs grouped by place; dot area follows the installed capacity
+const solar = new Map<string, { kwp: number; count: number; province: Province }>();
+for (const p of projects) {
+  if (!p.place || !p.province) continue;
+  const hit = solar.get(p.place) ?? { kwp: 0, count: 0, province: p.province };
+  hit.kwp += p.kwp;
+  hit.count += 1;
+  solar.set(p.place, hit);
+}
+const solarDots = [...solar.entries()].map(([place, v]) => ({
+  place,
+  ...v,
+  label: places[place].label,
+  xy: places[place].xy,
+  r: 4.5 + Math.sqrt(v.kwp) * 2.1,
+}));
+
+const provinces: Province[] = ['Tarlac', 'Pangasinan', 'Bulacan', 'Metro Manila', 'Rizal'];
+const solarByProvince = provinces
+  .map((prov) => ({ prov, items: solarDots.filter((d) => d.province === prov).sort((a, b) => b.kwp - a.kwp) }))
+  .filter((g) => g.items.length);
+
+const workDots = experience.map((e) => ({ ...e, xy: places[e.place].xy }));
+const hq = places['hq-pura'];
+
+// a close-up box around the Metro Manila and Rizal cluster, in the map's aspect ratio
+const cluster = ['makati', 'aurora-blvd', 'up-village', 'kingsville', 'kingsville-hills', 'cupang', 'boso-boso', 'taguig'];
+const xs = cluster.map((c) => places[c].xy[0]);
+const ys = cluster.map((c) => places[c].xy[1]);
+const aspect = map.height / map.width;
+const zw = Math.max(...xs) - Math.min(...xs) + 90;
+const zh = zw * aspect;
+const zx = (Math.min(...xs) + Math.max(...xs)) / 2 - zw / 2;
+const zy = (Math.min(...ys) + Math.max(...ys)) / 2 - zh / 2;
+const fullBox = `0 0 ${map.width} ${map.height}`;
+const zoomBox = `${zx.toFixed(1)} ${zy.toFixed(1)} ${zw.toFixed(1)} ${zh.toFixed(1)}`;
+const fmtKwp = (v: number) => formatKwp(Math.round(v * 100) / 100);
+---
+
+<section class="mapsec chapter" data-chapter={chapter} aria-labelledby={`${id}-title`}>
+  <div class="wrap">
+    <div class="mapsec__head">
+      <h2 id={`${id}-title`} class="t-head" data-reveal>{title}</h2>
+      <p class="t-lead mapsec__intro" data-reveal>{intro}</p>
+    </div>
+
+    <div class="mapsec__grid">
+      <div class="mapsec__mapcol" data-reveal="fade">
+        <div class="mapsec__controls" role="group" aria-label="Map view">
+          <button type="button" class="chip" data-view="full" aria-pressed="true">All sites</button>
+          <button type="button" class="chip" data-view="zoom" aria-pressed="false">Metro Manila and Rizal</button>
+        </div>
+        <div class="mapsec__map">
+          <svg
+            viewBox={fullBox}
+            data-full={fullBox}
+            data-zoom={zoomBox}
+            data-width={map.width}
+            role="img"
+            aria-labelledby={`${id}-maptitle`}
+          >
+            <title id={`${id}-maptitle`}>
+              Map of central Luzon with JTEC’s solar installations, its electrical projects since 2016 and its office in
+              Linao, Pura, Tarlac. The same places are listed beside the map.
+            </title>
+            <path class="land" d={map.land}></path>
+            {map.lakes.map((l) => <path class="lake" d={l.d} />)}
+            {
+              map.water.map((w) => (
+                <text class="water-label" x={w.xy[0]} y={w.xy[1]} text-anchor="middle">
+                  {w.label}
+                </text>
+              ))
+            }
+            <g class="dots">
+              {
+                workDots.map((w) => (
+                  <g class="dot dot--work" data-place={w.place} transform={`translate(${w.xy[0]} ${w.xy[1]})`}>
+                    <circle r="8.5" />
+                    <text class="dot__label" x="14" y="5">
+                      {w.name}
+                    </text>
+                  </g>
+                ))
+              }
+              {
+                solarDots.map((d) => (
+                  <g class="dot dot--solar" data-place={d.place} data-r={d.r} transform={`translate(${d.xy[0]} ${d.xy[1]})`}>
+                    <circle r={d.r} />
+                    <text class="dot__label" x={d.r + 6} y="5">
+                      {d.label}
+                    </text>
+                  </g>
+                ))
+              }
+              <g class="dot dot--hq is-on" data-place="hq-pura" transform={`translate(${hq.xy[0]} ${hq.xy[1]})`}>
+                <circle class="hq-ring" r="15"></circle>
+                <circle class="hq-core" r="5"></circle>
+                <text class="dot__label" x="-22" y="5" text-anchor="end">JTEC office</text>
+              </g>
+            </g>
+          </svg>
+        </div>
+        <ul class="mapsec__legend" aria-label="Map key">
+          <li><span class="key key--solar" aria-hidden="true"></span>Solar installation, larger with more kWp</li>
+          <li><span class="key key--work" aria-hidden="true"></span>Electrical project</li>
+          <li><span class="key key--hq" aria-hidden="true"></span>Office, {site.address.locality}, {site.address.province}</li>
+        </ul>
+        <p class="mapsec__note">Positions are approximate town and barangay centres.</p>
+      </div>
+
+      {
+        showLists && (
+          <div class="mapsec__lists">
+            <div class="mapsec__list" data-reveal>
+              <h3 class="mapsec__subhead">Electrical projects</h3>
+              <ol>
+                {experience.map((e) => (
+                  <li>
+                    <button type="button" class="place" data-place={e.place}>
+                      <span class="place__meta t-num">{e.years}</span>
+                      <span class="place__name">{e.name}</span>
+                    </button>
+                  </li>
+                ))}
+              </ol>
+            </div>
+            <div class="mapsec__list" data-reveal>
+              <h3 class="mapsec__subhead">Solar installations by province</h3>
+              {solarByProvince.map((g) => (
+                <div class="mapsec__group">
+                  <p class="mapsec__prov">{g.prov}</p>
+                  <ul>
+                    {g.items.map((d) => (
+                      <li>
+                        <button type="button" class="place" data-place={d.place}>
+                          <span class="place__name">{d.label}</span>
+                          <span class="place__meta t-num">
+                            {d.count > 1 ? `${d.count} systems, ` : ''}
+                            {fmtKwp(d.kwp)}
+                          </span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+        )
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .mapsec__head {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    row-gap: 24px;
+  }
+
+  .mapsec__head h2 {
+    grid-column: 1 / span 9;
+  }
+
+  .mapsec__intro {
+    grid-column: 1 / span 6;
+    color: var(--muted);
+  }
+
+  .mapsec__grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    row-gap: 48px;
+    margin-top: clamp(40px, 5vw, 72px);
+  }
+
+  .mapsec__mapcol {
+    grid-column: 1 / span 7;
+  }
+
+  :global(html:not(.js)) .mapsec__controls {
+    display: none;
+  }
+
+  .mapsec__controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+
+  .mapsec__map {
+    position: relative;
+    background: color-mix(in oklab, var(--bg) 82%, black);
+    overflow: hidden;
+  }
+
+  .mapsec__map svg {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1000 / 1123;
+  }
+
+  .land {
+    fill: color-mix(in oklab, var(--bg) 78%, white);
+  }
+
+  .lake {
+    fill: color-mix(in oklab, var(--bg) 82%, black);
+  }
+
+  .water-label {
+    fill: color-mix(in srgb, var(--ink) 55%, transparent);
+    font-size: 19px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    transition: opacity var(--t-colour) var(--ease);
+  }
+
+  .mapsec__map[data-zoomed='true'] .water-label {
+    opacity: 0;
+  }
+
+  .dot circle {
+    transition:
+      fill var(--t-colour) var(--ease),
+      stroke var(--t-colour) var(--ease),
+      opacity var(--t-colour) var(--ease);
+  }
+
+  .dot--solar circle {
+    fill: var(--c-amber);
+    fill-opacity: 0.92;
+  }
+
+  .dot--work circle {
+    fill: none;
+    stroke: var(--ink);
+    stroke-width: 3;
+  }
+
+  .hq-ring {
+    fill: none;
+    stroke: var(--c-amber);
+    stroke-width: 4;
+  }
+
+  .hq-core {
+    fill: var(--c-amber);
+  }
+
+  .dot__label {
+    fill: var(--ink);
+    font-size: 20px;
+    font-weight: 650;
+    paint-order: stroke;
+    stroke: color-mix(in oklab, var(--bg) 82%, black);
+    stroke-width: 6px;
+    stroke-linejoin: round;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--t-colour) var(--ease);
+  }
+
+  .dot.is-on .dot__label {
+    opacity: 1;
+  }
+
+  .dot.is-on.dot--solar circle {
+    fill-opacity: 1;
+    stroke: var(--ink);
+    stroke-width: 3;
+  }
+
+  .dot.is-on.dot--work circle {
+    stroke: var(--c-amber);
+    stroke-width: 5;
+  }
+
+  .mapsec__map[data-dim='true'] .dot:not(.is-on) circle {
+    opacity: 0.35;
+  }
+
+  .mapsec__legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 24px;
+    margin-top: 18px;
+    font-size: var(--step-small);
+    font-weight: 520;
+  }
+
+  .mapsec__legend li {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .key {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+  }
+
+  .key--solar {
+    background: var(--c-amber);
+  }
+
+  .key--work {
+    border: 2.5px solid var(--ink);
+  }
+
+  .key--hq {
+    width: 18px;
+    height: 18px;
+    border: 3px solid var(--c-amber);
+    background: radial-gradient(circle, var(--c-amber) 0 3px, transparent 3.5px);
+  }
+
+  .mapsec__note {
+    margin-top: 8px;
+    font-size: var(--step-small);
+    color: var(--muted);
+  }
+
+  .mapsec__lists {
+    grid-column: 9 / span 4;
+    display: grid;
+    align-content: start;
+    gap: 40px;
+  }
+
+  .mapsec__subhead {
+    font-size: var(--step-lead);
+    font-weight: 720;
+    font-stretch: 104%;
+    letter-spacing: -0.015em;
+    margin-bottom: 10px;
+  }
+
+  .mapsec__prov {
+    margin-top: 14px;
+    font-size: var(--step-small);
+    font-weight: 600;
+    color: var(--muted);
+  }
+
+  .place {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 2px 14px;
+    width: 100%;
+    min-height: 44px;
+    padding: 9px 10px 9px 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    transition: color var(--t-colour) var(--ease);
+  }
+
+  .mapsec__group .place {
+    grid-template-columns: 1fr auto;
+  }
+
+  .place__meta {
+    color: var(--muted);
+    font-size: var(--step-small);
+    font-weight: 560;
+    align-self: center;
+  }
+
+  .mapsec__list ol .place__meta {
+    min-width: 6.6em;
+  }
+
+  .place__name {
+    font-weight: 560;
+  }
+
+  .place:hover,
+  .place.is-on {
+    color: var(--c-amber);
+  }
+
+  .place:hover .place__meta,
+  .place.is-on .place__meta {
+    color: inherit;
+  }
+
+  @media (max-width: 1000px) {
+    .mapsec__head h2,
+    .mapsec__intro,
+    .mapsec__mapcol,
+    .mapsec__lists {
+      grid-column: 1 / -1;
+    }
+    .mapsec__lists {
+      grid-template-columns: 1fr 1fr;
+      gap: 32px var(--gutter);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .mapsec__lists {
+      grid-template-columns: 1fr;
+    }
+    .mapsec__map {
+      margin-inline: calc(-1 * var(--margin));
+    }
+  }
+</style>
+
+<script>
+  import { gsap } from 'gsap';
+
+  document.querySelectorAll<HTMLElement>('.mapsec').forEach((section) => {
+    const mapBox = section.querySelector<HTMLElement>('.mapsec__map')!;
+    const svg = mapBox.querySelector<SVGSVGElement>('svg')!;
+    const dots = Array.from(svg.querySelectorAll<SVGGElement>('.dot'));
+    const items = Array.from(section.querySelectorAll<HTMLButtonElement>('.place'));
+    const chips = Array.from(section.querySelectorAll<HTMLButtonElement>('.chip'));
+    const width = Number(svg.dataset.width);
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const base = new Map(dots.map((d) => [d, d.getAttribute('transform') ?? '']));
+    const clusterPlaces = new Set(['makati', 'aurora-blvd', 'up-village', 'kingsville', 'kingsville-hills', 'cupang', 'boso-boso', 'taguig']);
+
+    // keep markers the same size on screen while the map zooms
+    const rescale = () => {
+      const vb = svg.viewBox.baseVal;
+      const s = vb.width / width;
+      dots.forEach((d) => d.setAttribute('transform', `${base.get(d)} scale(${s.toFixed(4)})`));
+    };
+
+    const setView = (view: 'full' | 'zoom') => {
+      chips.forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.view === view)));
+      mapBox.dataset.zoomed = String(view === 'zoom');
+      const box = view === 'zoom' ? svg.dataset.zoom! : svg.dataset.full!;
+      if (reduce) {
+        svg.setAttribute('viewBox', box);
+        rescale();
+        return;
+      }
+      gsap.to(svg, { attr: { viewBox: box }, duration: 0.9, ease: 'power3.inOut', onUpdate: rescale });
+    };
+    chips.forEach((c) => c.addEventListener('click', () => setView(c.dataset.view === 'zoom' ? 'zoom' : 'full')));
+
+    const highlight = (place: string | null) => {
+      mapBox.dataset.dim = String(Boolean(place));
+      dots.forEach((d) => d.classList.toggle('is-on', d.dataset.place === place || d.dataset.place === 'hq-pura'));
+      items.forEach((i) => i.classList.toggle('is-on', i.dataset.place === place));
+    };
+
+    items.forEach((item) => {
+      const place = item.dataset.place!;
+      item.addEventListener('pointerenter', () => highlight(place));
+      item.addEventListener('focus', () => highlight(place));
+      item.addEventListener('click', () => {
+        highlight(place);
+        const inCluster = clusterPlaces.has(place);
+        const zoomed = mapBox.dataset.zoomed === 'true';
+        if (inCluster && !zoomed) setView('zoom');
+        if (!inCluster && zoomed) setView('full');
+      });
+    });
+    section.querySelector('.mapsec__lists')?.addEventListener('pointerleave', () => highlight(null));
+    section.querySelector('.mapsec__lists')?.addEventListener('focusout', (e) => {
+      if (!(e as FocusEvent).relatedTarget || !section.contains((e as FocusEvent).relatedTarget as Node)) highlight(null);
+    });
+    dots.forEach((d) => {
+      d.addEventListener('pointerenter', () => highlight(d.dataset.place ?? null));
+      d.addEventListener('pointerleave', () => highlight(null));
+    });
+  });
+</script>

@@ -1,0 +1,30 @@
+{
+  "_note": "Approximate town or barangay centres (WGS84). Used only to place dots on the Luzon map; positions are not survey-accurate.",
+  "places": [
+    { "id": "hq-pura", "label": "Linao, Pura, Tarlac", "lat": 15.632, "lon": 120.652 },
+
+    { "id": "kingsville", "label": "Kingsville Subdivision, Antipolo City", "lat": 14.624, "lon": 121.126 },
+    { "id": "kingsville-hills", "label": "Kingsville Hills, Antipolo City", "lat": 14.629, "lon": 121.134 },
+    { "id": "boso-boso", "label": "Boso-Boso, Antipolo City", "lat": 14.645, "lon": 121.228 },
+    { "id": "cupang", "label": "Cupang, Antipolo City", "lat": 14.611, "lon": 121.161 },
+    { "id": "up-village", "label": "UP Village, Quezon City", "lat": 14.654, "lon": 121.063 },
+    { "id": "sta-maria", "label": "Sta. Maria, Bulacan", "lat": 14.819, "lon": 120.960 },
+    { "id": "malasiqui", "label": "Malasiqui, Pangasinan", "lat": 15.917, "lon": 120.414 },
+    { "id": "san-rafael", "label": "San Rafael, Tarlac City", "lat": 15.492, "lon": 120.592 },
+    { "id": "pura", "label": "Pura, Tarlac", "lat": 15.624, "lon": 120.648 },
+    { "id": "urdaneta", "label": "Urdaneta, Pangasinan", "lat": 15.976, "lon": 120.571 },
+
+    { "id": "makati", "label": "Circuit Makati, Makati City", "lat": 14.573, "lon": 121.019 },
+    { "id": "aurora-blvd", "label": "Aurora Boulevard, Quezon City", "lat": 14.620, "lon": 121.053 },
+    { "id": "carmona", "label": "Carmona, Cavite", "lat": 14.313, "lon": 121.046 },
+    { "id": "tanza", "label": "Tanza, Cavite", "lat": 14.394, "lon": 120.853 },
+    { "id": "calamba", "label": "Calamba, Laguna", "lat": 14.212, "lon": 121.165 },
+    { "id": "taguig", "label": "Taguig City", "lat": 14.536, "lon": 121.058 },
+    { "id": "mabalacat", "label": "Mabalacat, Pampanga", "lat": 15.223, "lon": 120.571 }
+  ],
+  "water": [
+    { "id": "manila-bay", "label": "Manila Bay", "lat": 14.53, "lon": 120.76 },
+    { "id": "lingayen-gulf", "label": "Lingayen Gulf", "lat": 16.27, "lon": 120.18 },
+    { "id": "laguna-de-bay", "label": "Laguna de Bay", "lat": 14.37, "lon": 121.24 }
+  ]
+}

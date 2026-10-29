@@ -1,0 +1,353 @@
+---
+import { Image } from 'astro:assets';
+import { projects, totalKwp, smallest, largest, formatDate, formatKwp, type Project } from '../data/projects';
+
+interface Props {
+  id?: string;
+  linkToProjects?: boolean;
+}
+
+const { id = 'log', linkToProjects = true } = Astro.props;
+const dated = projects.filter((p) => p.date);
+const undated = projects.filter((p) => !p.date);
+const rows: Project[] = [...dated, ...undated];
+const total = totalKwp.toLocaleString('en-PH', { maximumFractionDigits: 2 });
+---
+
+<section class="log chapter" data-chapter="amber" aria-labelledby={`${id}-title`}>
+  <div class="wrap">
+    <div class="log__top">
+      <h2 id={`${id}-title`} class="t-head" data-reveal>The installation log</h2>
+      <p class="log__figure" data-reveal>
+        <span class="log__figure-value">{total}</span><span class="log__figure-unit">kWp</span>
+      </p>
+      <p class="t-lead log__intro" data-reveal>
+        of solar across the {projects.length} systems below, from a {formatKwp(smallest.kwp)} hybrid in {smallest.location}{' '}
+        to a {formatKwp(largest.kwp)} grid-tied system in {largest.location}.
+      </p>
+    </div>
+
+    <div class="log__body">
+      <div class="log__table-wrap" data-reveal>
+        <table class="log__table">
+          <caption class="visually-hidden">
+            Solar installations listed in the JTEC company profile, newest first. Size in kilowatt-peak, battery capacity
+            in ampere-hours.
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Date</th>
+              <th scope="col">System</th>
+              <th scope="col">Battery</th>
+              <th scope="col">Location</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              rows.map((p, i) => (
+                <tr data-index={i} data-active={i === 0 ? 'true' : 'false'}>
+                  <td class="t-num log__date">{formatDate(p.date) ?? 'Not dated'}</td>
+                  <th scope="row" class="log__system">
+                    <a href={linkToProjects ? `/projects/#${p.slug}` : `#${p.slug}`} data-index={i}>
+                      <span class="t-num">{formatKwp(p.kwp)}</span> {p.type === 'Hybrid' ? 'hybrid' : 'grid-tied'}
+                    </a>
+                  </th>
+                  <td class="t-num">{p.batteryAh ? `${p.batteryAh} Ah` : 'None'}</td>
+                  <td class="log__place">{p.location ?? 'Location not listed'}</td>
+                  <td class="log__thumbs" aria-hidden="true">
+                    <Image src={p.photos[0]} alt="" widths={[160, 240]} sizes="96px" loading="lazy" />
+                    <Image src={p.photos[1]} alt="" widths={[160, 240]} sizes="96px" loading="lazy" />
+                  </td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="log__preview" aria-hidden="true">
+        {
+          rows.map((p, i) => (
+            <figure class="log__shot" data-index={i} data-active={i === 0 ? 'true' : 'false'}>
+              <div class="log__pair">
+                <Image src={p.photos[0]} alt="" widths={[240, 360]} sizes="(max-width: 1200px) 18vw, 230px" loading="lazy" />
+                <Image src={p.photos[1]} alt="" widths={[240, 360]} sizes="(max-width: 1200px) 18vw, 230px" loading="lazy" />
+              </div>
+              <figcaption>
+                <span>{formatKwp(p.kwp)} {p.type === 'Hybrid' ? 'hybrid' : 'grid-tied'}</span>
+                {p.location ?? 'Location not listed'}
+              </figcaption>
+            </figure>
+          ))
+        }
+      </div>
+    </div>
+
+    {
+      linkToProjects && (
+        <a class="cable-link log__all" href="/projects/" data-reveal>
+          <span class="cable-link__wire" aria-hidden="true" />
+          Photos of every installation
+        </a>
+      )
+    }
+  </div>
+</section>
+
+<style>
+  .log__top {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    align-items: end;
+  }
+
+  .log__top h2 {
+    grid-column: 1 / -1;
+  }
+
+  .log__figure {
+    grid-column: 1 / span 8;
+    display: flex;
+    align-items: baseline;
+    gap: 0.12em;
+    margin-top: clamp(24px, 3vw, 40px);
+    font-size: clamp(4rem, 0.5rem + 12.4vw, 12.5rem);
+    font-weight: 800;
+    font-stretch: 112%;
+    letter-spacing: -0.05em;
+    line-height: 0.85;
+  }
+
+  .log__figure-unit {
+    font-size: 0.32em;
+    letter-spacing: -0.02em;
+  }
+
+  .log__intro {
+    grid-column: 9 / span 4;
+    padding-bottom: 0.4em;
+  }
+
+  .log__body {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    margin-top: clamp(48px, 6vw, 96px);
+  }
+
+  .log__table-wrap {
+    grid-column: 1 / span 8;
+  }
+
+  .log__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--step-body);
+  }
+
+  .log__table thead th {
+    padding: 0 16px 14px 0;
+    text-align: left;
+    font-size: var(--step-small);
+    font-weight: 600;
+    color: var(--muted);
+  }
+
+  .log__table tbody tr {
+    transition: background-color var(--t-colour) var(--ease);
+  }
+
+  .log__table tbody tr[data-active='true'] {
+    background: var(--surface);
+  }
+
+  .log__table td,
+  .log__table tbody th {
+    padding: 14px 16px 14px 0;
+    text-align: left;
+    vertical-align: baseline;
+    font-weight: 450;
+    box-shadow: inset 0 -2px 0 rgb(6 34 61 / 0.14);
+  }
+
+  .log__table tbody tr td:first-child {
+    padding-left: 12px;
+  }
+
+  .log__date {
+    white-space: nowrap;
+  }
+
+  .log__system a {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.3em;
+    min-height: 32px;
+    font-weight: 700;
+    font-stretch: 104%;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .log__system a:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.2em;
+  }
+
+  .log__thumbs {
+    display: none;
+  }
+
+  .log__preview {
+    grid-column: 9 / span 4;
+    position: sticky;
+    top: calc(var(--header-h) + 32px);
+    align-self: start;
+    min-height: 340px;
+  }
+
+  .log__shot {
+    position: absolute;
+    inset: 0 0 auto 0;
+    margin: 0;
+    opacity: 0;
+    transition: opacity 420ms var(--ease);
+  }
+
+  .log__shot[data-active='true'] {
+    position: relative;
+    opacity: 1;
+  }
+
+  .log__pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .log__pair :global(img) {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+  }
+
+  .log__shot figcaption {
+    display: grid;
+    margin-top: 14px;
+    font-size: var(--step-small);
+    color: var(--muted);
+  }
+
+  .log__shot figcaption span {
+    font-size: var(--step-body);
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .log__all {
+    margin-top: clamp(36px, 4vw, 56px);
+  }
+
+  @media (max-width: 1000px) {
+    .log__figure,
+    .log__intro {
+      grid-column: 1 / -1;
+    }
+    .log__intro {
+      margin-top: 20px;
+      max-width: 40ch;
+    }
+    .log__table-wrap {
+      grid-column: 1 / -1;
+    }
+    .log__preview {
+      display: none;
+    }
+    .log__table thead {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+    }
+    .log__table,
+    .log__table tbody,
+    .log__table tr,
+    .log__table td,
+    .log__table tbody th {
+      display: block;
+    }
+    .log__table tbody tr {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      column-gap: 16px;
+      padding: 18px 0;
+      box-shadow: inset 0 -2px 0 rgb(6 34 61 / 0.14);
+    }
+    .log__table tbody tr[data-active='true'] {
+      background: transparent;
+    }
+    .log__table td,
+    .log__table tbody th {
+      padding: 0;
+      box-shadow: none;
+    }
+    .log__table tbody tr td:first-child {
+      padding-left: 0;
+    }
+    .log__system {
+      grid-column: 1;
+      grid-row: 1;
+      font-size: var(--step-lead);
+    }
+    .log__system a {
+      min-height: 44px;
+      align-items: center;
+    }
+    .log__date {
+      grid-column: 1;
+      grid-row: 3;
+      font-size: var(--step-small);
+      color: var(--muted);
+    }
+    .log__table td:nth-child(3) {
+      grid-column: 1;
+      grid-row: 2;
+    }
+    .log__place {
+      grid-column: 1;
+      grid-row: 4;
+      margin-top: 4px;
+    }
+    .log__thumbs {
+      display: flex;
+      gap: 6px;
+      grid-column: 2;
+      grid-row: 1 / span 4;
+      align-self: start;
+    }
+    .log__thumbs :global(img) {
+      width: 56px;
+      height: 72px;
+      object-fit: cover;
+    }
+  }
+</style>
+
+<script>
+  // Pointer or keyboard focus on a row shows that installation's photographs beside the table.
+  document.querySelectorAll<HTMLElement>('.log').forEach((section) => {
+    const rows = Array.from(section.querySelectorAll<HTMLTableRowElement>('tbody tr'));
+    const shots = Array.from(section.querySelectorAll<HTMLElement>('.log__shot'));
+    const activate = (index: number) => {
+      rows.forEach((r, i) => (r.dataset.active = String(i === index)));
+      shots.forEach((s, i) => (s.dataset.active = String(i === index)));
+    };
+    rows.forEach((row, i) => {
+      row.addEventListener('pointerenter', () => activate(i));
+      row.querySelector('a')?.addEventListener('focus', () => activate(i));
+    });
+  });
+</script>

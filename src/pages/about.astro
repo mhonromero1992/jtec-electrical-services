@@ -1,0 +1,354 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import TeamGrid from '../components/TeamGrid.astro';
+import TrackRecord from '../components/TrackRecord.astro';
+import blueRoof from '../assets/photos/rooftop-blue-roof.jpg';
+import sunrise from '../assets/photos/sunrise-over-array.jpg';
+import crew from '../assets/photos/crew-two-panels.png';
+import { site, mission, vision, values, commitments } from '../data/site';
+---
+
+<Base
+  title="About | JTEC Electrical Services"
+  description="JTEC Electrical Services is an electrical contractor with a solar division, JTEC Solar Installation. Mission, vision, values, the team and its work experience since 2016."
+  firstChapter="stone"
+>
+  <section class="ab-hero" data-chapter="stone" aria-labelledby="page-title">
+    <div class="wrap ab-hero__grid">
+      <h1 id="page-title" class="t-display ab-hero__title" data-reveal>Powering progress, panel by panel.</h1>
+      <div class="ab-hero__text">
+        <p class="t-lead ab-hero__lede" data-reveal>
+          At {site.name}, the work is reliable electrical solutions and sustainable energy systems. With its division,{' '}
+          {site.division}, JTEC helps homes and businesses move to cleaner, more efficient and cost-effective power.
+        </p>
+        <div class="ab-hero__body measure" data-reveal>
+          <p>
+            The team is skilled, and guided by quality, safety and integrity. Whether the job is a simple electrical
+            requirement or a complete solar installation, the aim on every project is to exceed what the client
+            expected.
+          </p>
+          <p>
+            The goal going forward stays the same: energy solutions that meet today’s demands and contribute to a
+            brighter, more sustainable future for the next generations.
+          </p>
+        </div>
+      </div>
+      <figure class="ab-hero__photo" data-reveal="fade">
+        <Image
+          src={blueRoof}
+          alt="Rows of solar panels on a blue corrugated roof, with trees behind"
+          widths={[480, 640, 830]}
+          sizes="(max-width: 900px) 92vw, 40vw"
+          loading="eager"
+          fetchpriority="high"
+        />
+        <figcaption class="caption">A JTEC rooftop array on a blue corrugated roof</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="mv chapter" data-chapter="navy" aria-labelledby="mv-title">
+    <div class="wrap mv__grid">
+      <h2 id="mv-title" class="visually-hidden">Mission and vision</h2>
+      <figure class="mv__photo" data-reveal="fade">
+        <Image src={sunrise} alt="The sun low over a rooftop solar array" widths={[300, 400]} sizes="(max-width: 900px) 40vw, 22vw" loading="lazy" />
+      </figure>
+      <div class="mv__item" data-reveal>
+        <h3 class="mv__label">Mission</h3>
+        <p class="mv__statement">{mission}</p>
+      </div>
+      <div class="mv__item" data-reveal>
+        <h3 class="mv__label">Vision</h3>
+        <p class="mv__statement">{vision}</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="values chapter" data-chapter="blue" aria-labelledby="values-title">
+    <div class="wrap">
+      <h2 id="values-title" class="t-head values__title" data-reveal>Six values on every job</h2>
+      <ul class="values__list">
+        {
+          values.map((v) => (
+            <li class="values__item" data-reveal>
+              <h3 class="values__name">{v.name}</h3>
+              <p class="values__text">{v.text}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="commit chapter" data-chapter="amber" aria-labelledby="commit-title">
+    <div class="wrap commit__grid">
+      <div class="commit__head">
+        <h2 id="commit-title" class="t-head" data-reveal>What clients can hold JTEC to</h2>
+        <p class="t-lead commit__intro" data-reveal>Ten commitments from the company profile, in its own order.</p>
+      </div>
+      <ol class="commit__list">
+        {
+          commitments.map((c) => (
+            <li class="commit__item" data-reveal>
+              <h3 class="commit__name">{c.title}</h3>
+              <p class="commit__text">{c.text}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <TeamGrid id="about-team" title="The people on the job" />
+
+  <section class="crew" data-chapter="stone" aria-labelledby="crew-title">
+    <div class="wrap crew__grid">
+      <div class="crew__text">
+        <h2 id="crew-title" class="crew__title" data-reveal>And the crew on site</h2>
+        <p data-reveal>
+          Installations are carried out by a workforce of {site.workforce}, alongside the licensed engineers who handle
+          each project.
+        </p>
+      </div>
+      <figure class="crew__photo" data-reveal="fade">
+        <Image
+          src={crew}
+          alt="Five members of the JTEC crew standing between two solar panels held upright"
+          widths={[480, 760, 1000]}
+          sizes="(max-width: 900px) 92vw, 60vw"
+          loading="lazy"
+        />
+      </figure>
+    </div>
+  </section>
+
+  <TrackRecord />
+</Base>
+
+<style>
+  .ab-hero {
+    padding-top: calc(var(--header-h) + clamp(48px, 9vh, 120px));
+    padding-bottom: var(--section-y);
+  }
+
+  .ab-hero__grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    row-gap: 48px;
+  }
+
+  .ab-hero__title {
+    grid-column: 1 / -1;
+    font-size: min(var(--step-display), 7.4vw);
+  }
+
+  .ab-hero__text {
+    grid-column: 1 / span 6;
+    align-self: end;
+  }
+
+  .ab-hero__lede {
+    max-width: 36ch;
+  }
+
+  .ab-hero__body {
+    display: grid;
+    gap: 16px;
+    margin-top: 24px;
+  }
+
+  .ab-hero__photo {
+    grid-column: 9 / span 4;
+    align-self: end;
+  }
+
+  .ab-hero__photo :global(img) {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+  }
+
+  /* ---------------------------------------------- mission and vision */
+  .mv__grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    row-gap: 48px;
+    align-items: start;
+  }
+
+  .mv__photo {
+    grid-column: 1 / span 3;
+    grid-row: 1 / span 2;
+  }
+
+  .mv__photo :global(img) {
+    width: 100%;
+    aspect-ratio: 3 / 5;
+    object-fit: cover;
+  }
+
+  .mv__item {
+    grid-column: 5 / span 8;
+  }
+
+  .mv__label {
+    font-size: var(--step-small);
+    font-weight: 650;
+    color: var(--c-amber);
+  }
+
+  .mv__statement {
+    margin-top: 14px;
+    font-size: clamp(1.5rem, 1.1rem + 1.4vw, 2.25rem);
+    font-weight: 500;
+    line-height: 1.25;
+    letter-spacing: -0.015em;
+    text-wrap: pretty;
+  }
+
+  /* ---------------------------------------------- values */
+  .values__title {
+    max-width: 12ch;
+  }
+
+  .values__list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(36px, 4vw, 56px) var(--gutter);
+    margin-top: clamp(48px, 6vw, 88px);
+  }
+
+  .values__item {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
+    gap: 20px;
+    align-items: baseline;
+  }
+
+  .values__name {
+    font-size: clamp(2rem, 1.2rem + 2.4vw, 3.5rem);
+    font-weight: 780;
+    font-stretch: 108%;
+    letter-spacing: -0.035em;
+    line-height: 1;
+  }
+
+  .values__text {
+    color: var(--muted);
+  }
+
+  /* ---------------------------------------------- commitments */
+  .commit__grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    row-gap: 48px;
+  }
+
+  .commit__head {
+    grid-column: 1 / span 9;
+  }
+
+  .commit__intro {
+    margin-top: 20px;
+  }
+
+  .commit__list {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 40px var(--gutter);
+    margin-top: clamp(16px, 2vw, 32px);
+  }
+
+  .commit__name {
+    font-size: var(--step-lead);
+    font-weight: 740;
+    font-stretch: 104%;
+    letter-spacing: -0.015em;
+    line-height: 1.2;
+  }
+
+  .commit__text {
+    margin-top: 8px;
+    color: var(--muted);
+  }
+
+  /* ---------------------------------------------- crew */
+  .crew {
+    padding-top: 0;
+  }
+
+  .crew__grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    row-gap: 32px;
+    align-items: end;
+  }
+
+  .crew__text {
+    grid-column: 1 / span 4;
+    padding-bottom: var(--section-y);
+  }
+
+  .crew__title {
+    font-size: clamp(1.75rem, 1.2rem + 1.8vw, 2.75rem);
+    font-weight: 760;
+    font-stretch: 106%;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    margin-bottom: 16px;
+  }
+
+  .crew__photo {
+    grid-column: 6 / span 7;
+  }
+
+  .crew__photo :global(img) {
+    width: 100%;
+    height: auto;
+  }
+
+  @media (max-width: 1100px) and (min-width: 901px) {
+    .commit__list {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .ab-hero__text,
+    .ab-hero__photo,
+    .mv__item,
+    .commit__head,
+    .commit__list,
+    .crew__text,
+    .crew__photo {
+      grid-column: 1 / -1;
+    }
+    .ab-hero__photo {
+      max-width: 420px;
+    }
+    .mv__photo {
+      grid-column: 1 / span 5;
+      grid-row: auto;
+    }
+    .values__list,
+    .commit__list {
+      grid-template-columns: 1fr;
+    }
+    .crew__text {
+      padding-bottom: 0;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .values__item {
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+  }
+</style>
