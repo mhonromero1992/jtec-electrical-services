@@ -11,7 +11,7 @@ const path = Astro.url.pathname.replace(/\/?$/, '/');
 const isCurrent = (href: string) => path === href;
 ---
 
-<header class="site-header" data-theme={chapterTheme[firstChapter]} data-chapter={firstChapter} data-at-top="true">
+<header class="site-header" data-theme={chapterTheme[firstChapter]} data-over={firstChapter} data-at-top="true">
   <a class="skip-link" href="#main">Skip to content</a>
   <div class="site-header__bar wrap">
     <a href="/" class="brand" aria-label={`${site.name}, home`}>
@@ -130,29 +130,29 @@ const isCurrent = (href: string) => path === href;
   }
 
   /* the glass takes a tint of the chapter it floats over */
-  .site-header[data-chapter='blue'] {
+  .site-header[data-over='blue'] {
     --hdr-bg: rgb(4 97 189 / 0.66);
     --bg: var(--c-blue);
   }
 
-  .site-header[data-chapter='navy'] {
+  .site-header[data-over='navy'] {
     --hdr-bg: rgb(0 75 126 / 0.66);
     --bg: var(--c-navy);
   }
 
-  .site-header[data-chapter='night'] {
+  .site-header[data-over='night'] {
     --hdr-bg: rgb(1 24 44 / 0.66);
     --bg: var(--c-night);
   }
 
-  .site-header[data-chapter='amber'] {
+  .site-header[data-over='amber'] {
     --hdr-bg: rgb(255 179 3 / 0.72);
     --bg: var(--c-amber);
     --focus: var(--c-ink);
   }
 
   /* over the amber chapter the amber button would vanish, so it turns navy */
-  .site-header[data-chapter='amber'] .site-header__cta {
+  .site-header[data-over='amber'] .site-header__cta {
     --btn-bg: var(--c-ink);
     --btn-ink: var(--c-amber);
   }
@@ -465,7 +465,7 @@ const isCurrent = (href: string) => path === href;
       const chapter = under?.closest<HTMLElement>('[data-chapter]')?.dataset.chapter as ChapterName | undefined;
       if (chapter && chapterTheme[chapter]) {
         header.dataset.theme = chapterTheme[chapter];
-        header.dataset.chapter = chapter;
+        header.dataset.over = chapter;
       }
       // tuck the bar away while reading downwards, bring it back on any upward scroll
       const goingDown = y > lastY + 4;
